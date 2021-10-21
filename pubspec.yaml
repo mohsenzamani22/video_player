@@ -13,7 +13,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.video.player.
+        package: com.video.player
         pluginClass: VideoPlayerPlugin
 
 dependencies:
