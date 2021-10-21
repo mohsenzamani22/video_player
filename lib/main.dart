@@ -46,7 +46,7 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.network(
-        'http://046401bd-post-video.s3.ir-thr-at1.arvanstorage.com/e0e206d02c72b4e070ff2d92817d86ab.mp4')
+        'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4')
       ..setLooping(true)
       ..initialize().then((value) {
         _controller.play();
