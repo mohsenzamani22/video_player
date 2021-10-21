@@ -16,11 +16,12 @@ import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 
 import java.util.Map;
 
+@SuppressWarnings("deprecation")
 class CacheDataSourceFactory implements DataSource.Factory {
     private final Context context;
     private final long maxFileSize, maxCacheSize;
-    private final DefaultHttpDataSourceFactory defaultHttpDataSourceFactory;
 
+    private final DefaultHttpDataSourceFactory defaultHttpDataSourceFactory;
     CacheDataSourceFactory(Context context, long maxCacheSize, long maxFileSize) {
         super();
         this.context = context;
