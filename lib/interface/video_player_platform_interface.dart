@@ -7,7 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:meta/meta.dart';
 import 'method_channel_video_player.dart';
 
 /// The interface that implementations of video_player must implement.
