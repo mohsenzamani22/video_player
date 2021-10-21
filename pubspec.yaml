@@ -2,7 +2,7 @@ name: cache_video_player
 description: Video Player With Cache Capability
 repository: https://github.com/mohsenzamani22/video_player.git
 
-version: 0.0.1+2
+version: 0.0.1+5
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -13,7 +13,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.video.player
+        package: video.player
         pluginClass: VideoPlayerPlugin
 
 dependencies:
