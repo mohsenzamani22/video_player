@@ -1,5 +1,5 @@
+import 'package:cache_video_player/player/video_player.dart';
 import 'package:flutter/material.dart';
-import 'package:video/player/video_player.dart';
 
 void main() {
   runApp(MaterialApp(home: _App()));

@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cache_video_player/interface/video_player_platform_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
-import 'package:video/interface/video_player_platform_interface.dart';
 
 import 'src/closed_caption_file.dart';
 export 'src/closed_caption_file.dart';
@@ -466,7 +465,7 @@ class _VideoAppLifeCycleObserver extends Object with WidgetsBindingObserver {
 }
 
 class VideoPlayer extends StatefulWidget {
-  VideoPlayer(this.controller);
+  const VideoPlayer(this.controller);
 
   final VideoPlayerController controller;
 

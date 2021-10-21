@@ -1,8 +1,8 @@
-name: video
-description: A new Flutter project.
+name: cache_video_player
+description: Video Player With Cache Capability
+repository: https://github.com/mohsenzamani22/video_player.git
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.0.0+1
+version: 0.0.1
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -19,11 +19,11 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.2
+  cupertino_icons: ^1.0.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.0
-  pedantic: ^1.10.0
-  pigeon: ^0.1.21
+  flutter_lints: ^1.0.4
+  pedantic: ^1.11.1
+  pigeon: ^1.0.7
