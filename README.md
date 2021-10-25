@@ -1,7 +1,5 @@
 A Flutter plugin for iOS, Android and Web for playing back video on a Widget surface.
 
-The example app running in iOS
-
 Installation
 First, add cache_video_player as a dependency in your pubspec.yaml file.
 
