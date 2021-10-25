@@ -20,7 +20,6 @@ import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import java.io.File;
 import java.util.Map;
 
-@SuppressWarnings("deprecation")
 class CacheDataSourceFactory implements DataSource.Factory {
     private final Context context;
     private final long maxFileSize, maxCacheSize;
@@ -55,7 +54,7 @@ class CacheDataSourceFactory implements DataSource.Factory {
         DefaultDataSourceFactory defaultDatasourceFactory = new DefaultDataSourceFactory(this.context,
                 bandwidthMeter, defaultHttpDataSourceFactory2);
 //        SimpleCache simpleCache = SimpleCacheSingleton.getInstance(context, maxCacheSize).simpleCache;
-        SimpleCache simpleCache = new SimpleCache(cacheDirectoryPath, new LeastRecentlyUsedCacheEvictor(maxCacheSize));
+        SimpleCache simpleCache = new SimpleCache(cacheDirectoryPath, new LeastRecentlyUsedCacheEvictor(maxCacheSize), (DatabaseProvider) null);
         return new CacheDataSource(simpleCache, defaultDatasourceFactory.createDataSource(),
                 new FileDataSource(), new CacheDataSink(simpleCache, maxFileSize),
                 CacheDataSource.FLAG_BLOCK_ON_CACHE | CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR, null);

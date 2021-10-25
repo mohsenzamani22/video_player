@@ -95,6 +95,4 @@ the rate of playback for your video.
 For example, when given a value of `2.0`, your video will play at 2x the regular playback speed
 and so on.
 
-To learn about playback speed limitations, see the [`setPlaybackSpeed` method documentation](https://pub.dev/documentation/video_player/latest/video_player/VideoPlayerController/setPlaybackSpeed.html).
-
 Furthermore, see the example app for an example playback speed implementation.
