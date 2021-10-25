@@ -23,20 +23,13 @@ import java.util.Map;
 class CacheDataSourceFactory implements DataSource.Factory {
     private final Context context;
     private final long maxFileSize, maxCacheSize;
-    private final File cacheDirectoryPath;
-
     private final DefaultHttpDataSource.Factory defaultHttpDataSourceFactory2;
 
-    CacheDataSourceFactory(Context context, long maxCacheSize, long maxFileSize, @Nullable File cacheDirectoryPath) {
+    CacheDataSourceFactory(Context context, long maxCacheSize, long maxFileSize) {
         super();
         this.context = context;
         this.maxCacheSize = maxCacheSize;
         this.maxFileSize = maxFileSize;
-        if (cacheDirectoryPath == null) {
-            this.cacheDirectoryPath = context.getCacheDir();
-        } else {
-            this.cacheDirectoryPath = cacheDirectoryPath;
-        }
         defaultHttpDataSourceFactory2 = new DefaultHttpDataSource.Factory()
                 .setUserAgent("ExoPlayer")
                 .setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS)
@@ -53,8 +46,7 @@ class CacheDataSourceFactory implements DataSource.Factory {
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter.Builder(context).build();
         DefaultDataSourceFactory defaultDatasourceFactory = new DefaultDataSourceFactory(this.context,
                 bandwidthMeter, defaultHttpDataSourceFactory2);
-//        SimpleCache simpleCache = SimpleCacheSingleton.getInstance(context, maxCacheSize).simpleCache;
-        SimpleCache simpleCache = new SimpleCache(cacheDirectoryPath, new LeastRecentlyUsedCacheEvictor(maxCacheSize), (DatabaseProvider) null);
+        SimpleCache simpleCache = SimpleCacheSingleton.getInstance(context, maxCacheSize).simpleCache;
         return new CacheDataSource(simpleCache, defaultDatasourceFactory.createDataSource(),
                 new FileDataSource(), new CacheDataSink(simpleCache, maxFileSize),
                 CacheDataSource.FLAG_BLOCK_ON_CACHE | CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR, null);
