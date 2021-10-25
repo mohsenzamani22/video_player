@@ -26,8 +26,10 @@ class CacheDataSourceFactory implements DataSource.Factory {
         this.context = context;
         this.maxCacheSize = maxCacheSize;
         this.maxFileSize = maxFileSize;
-        defaultHttpDataSourceFactory2 = new DefaultHttpDataSource.Factory().setUserAgent("ExoPlayer").setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS).setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS);
-
+        defaultHttpDataSourceFactory2 = new DefaultHttpDataSource.Factory()
+                .setUserAgent("ExoPlayer")
+                .setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS)
+                .setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS);
     }
 
     void setHeaders(Map<String, String> httpHeaders) {
