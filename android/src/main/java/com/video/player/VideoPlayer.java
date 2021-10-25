@@ -80,7 +80,7 @@ final class VideoPlayer {
         DataSource.Factory dataSourceFactory;
         if (isHTTP(uri)) {
             CacheDataSourceFactory httpDataSourceFactory =
-                    new CacheDataSourceFactory(context, 100 * 1024 * 1024, 10 * 1024 * 1024);
+                    new CacheDataSourceFactory(context, 100 * 1024 * 1024, 10 * 1024 * 1024, null);
             if (httpHeaders != null && !httpHeaders.isEmpty()) {
                 httpDataSourceFactory.setHeaders(httpHeaders);
             }
