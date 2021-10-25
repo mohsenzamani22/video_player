@@ -2,7 +2,7 @@ name: cache_video_player
 description: Video Player With Cache Capability
 repository: https://github.com/mohsenzamani22/video_player.git
 
-version: 0.0.2+1
+version: 0.0.2+0.5
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
