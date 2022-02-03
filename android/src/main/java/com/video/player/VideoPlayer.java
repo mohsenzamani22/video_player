@@ -5,16 +5,29 @@ import static com.google.android.exoplayer2.Player.REPEAT_MODE_OFF;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Surface;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Player.Listener;
+import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioAttributes;
+import com.google.android.exoplayer2.audio.AudioCapabilities;
+import com.google.android.exoplayer2.audio.AudioProcessor;
+import com.google.android.exoplayer2.audio.AudioRendererEventListener;
+import com.google.android.exoplayer2.audio.AudioSink;
+import com.google.android.exoplayer2.audio.DefaultAudioSink;
+import com.google.android.exoplayer2.audio.MediaCodecAudioRenderer;
+import com.google.android.exoplayer2.mediacodec.MediaCodecSelector;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
@@ -36,7 +49,10 @@ import com.google.android.exoplayer2.util.Util;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.view.TextureRegistry;
 
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -73,10 +89,21 @@ final class VideoPlayer {
         this.eventChannel = eventChannel;
         this.textureEntry = textureEntry;
         this.options = options;
-
-
         Uri uri = Uri.parse(dataSource);
-        exoPlayer = new SimpleExoPlayer.Builder(context).build();
+        FFTAudioProcessor fftAudioProcessor = new FFTAudioProcessor();
+        DefaultRenderersFactory defaultRenderersFactory = new DefaultRenderersFactory(context) {
+            @Override
+            protected void buildAudioRenderers(Context context, int extensionRendererMode, MediaCodecSelector mediaCodecSelector, boolean enableDecoderFallback, AudioSink audioSink, Handler eventHandler, AudioRendererEventListener eventListener, ArrayList<Renderer> out) {
+                out.add(new MediaCodecAudioRenderer(
+                        context,
+                        mediaCodecSelector, enableDecoderFallback, eventHandler, eventListener, new DefaultAudioSink(
+                        AudioCapabilities.getCapabilities(context), new AudioProcessor[]{fftAudioProcessor}
+                )
+                ));
+                super.buildAudioRenderers(context, extensionRendererMode, mediaCodecSelector, enableDecoderFallback, audioSink, eventHandler, eventListener, out);
+            }
+        };
+        exoPlayer = new SimpleExoPlayer.Builder(context, defaultRenderersFactory).build();
         DataSource.Factory dataSourceFactory;
         if (isHTTP(uri)) {
             CacheDataSourceFactory httpDataSourceFactory =
@@ -92,7 +119,7 @@ final class VideoPlayer {
         MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, formatHint, context);
         exoPlayer.setMediaSource(mediaSource);
         exoPlayer.prepare();
-
+        fftAudioProcessor.setListener((sampleRateHz, channelCount, fft) -> Log.d("Video", Arrays.toString(fft)));
         setupVideoPlayer(eventChannel, textureEntry);
     }
 

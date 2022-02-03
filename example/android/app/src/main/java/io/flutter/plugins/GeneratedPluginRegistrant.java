@@ -20,10 +20,5 @@ public final class GeneratedPluginRegistrant {
     } catch(Exception e) {
       Log.e(TAG, "Error registering plugin cache_video_player, com.video.player.VideoPlayerPlugin", e);
     }
-    try {
-      flutterEngine.getPlugins().add(new dev.flutter.plugins.integration_test.IntegrationTestPlugin());
-    } catch(Exception e) {
-      Log.e(TAG, "Error registering plugin integration_test, dev.flutter.plugins.integration_test.IntegrationTestPlugin", e);
-    }
   }
 }
