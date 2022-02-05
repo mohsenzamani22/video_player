@@ -119,7 +119,10 @@ final class VideoPlayer {
         MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, formatHint, context);
         exoPlayer.setMediaSource(mediaSource);
         exoPlayer.prepare();
-        fftAudioProcessor.setListener((sampleRateHz, channelCount, fft) -> Log.d("Video", Arrays.toString(fft)));
+        fftAudioProcessor.setListener((sampleRateHz, channelCount, fft) -> {
+            Log.d("Video", Arrays.toString(fft));
+            Log.d("sampleRateHz", String.valueOf(sampleRateHz));
+        });
         setupVideoPlayer(eventChannel, textureEntry);
     }
 
