@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "G:\\video_player\\android\\build\\intermediates\\res\\merged\\debug\\drawable\\notification_tile_bg.xml",
+        "source": "C:\\Users\\Pazh-IT\\.gradle\\caches\\transforms-2\\files-2.1\\6930c4f3987405b20d974f58b9305e53\\core-1.3.2\\res\\drawable\\notification_tile_bg.xml"
+    },
+    {
+        "merged": "G:\\video_player\\android\\build\\intermediates\\res\\merged\\debug\\drawable\\launch_background.xml",
+        "source": "G:\\video_player\\android\\src\\main\\res\\drawable\\launch_background.xml"
+    },
+    {
+        "merged": "G:\\video_player\\android\\build\\intermediates\\res\\merged\\debug\\drawable\\notification_bg.xml",
+        "source": "C:\\Users\\Pazh-IT\\.gradle\\caches\\transforms-2\\files-2.1\\6930c4f3987405b20d974f58b9305e53\\core-1.3.2\\res\\drawable\\notification_bg.xml"
+    },
+    {
+        "merged": "G:\\video_player\\android\\build\\intermediates\\res\\merged\\debug\\drawable\\notification_bg_low.xml",
+        "source": "C:\\Users\\Pazh-IT\\.gradle\\caches\\transforms-2\\files-2.1\\6930c4f3987405b20d974f58b9305e53\\core-1.3.2\\res\\drawable\\notification_bg_low.xml"
+    },
+    {
+        "merged": "G:\\video_player\\android\\build\\intermediates\\res\\merged\\debug\\drawable\\notification_icon_background.xml",
+        "source": "C:\\Users\\Pazh-IT\\.gradle\\caches\\transforms-2\\files-2.1\\6930c4f3987405b20d974f58b9305e53\\core-1.3.2\\res\\drawable\\notification_icon_background.xml"
+    }
+]
