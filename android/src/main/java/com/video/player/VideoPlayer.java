@@ -112,16 +112,35 @@ final class VideoPlayer {
         MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, formatHint, context);
         exoPlayer.setMediaSource(mediaSource);
         exoPlayer.prepare();
-
-      spectrumEventChannel.setStreamHandler();
-
-
         fftAudioProcessor.setListener((sampleRateHz, channelCount, fft) -> {
-            Log.d("Video", Arrays.toString(fft));
-            Log.d("sampleRateHz", String.valueOf(sampleRateHz));
+            Map<String, Object> event = new HashMap<>();
+            event.put("sampleRateHz", sampleRateHz);
+            event.put("channelCount", channelCount);
+            event.put("fft", fft);
+
+            Log.d("data ", event.toString());
+//            Log.d("Video", Arrays.toString(fft));
+//            Log.d("sampleRateHz", String.valueOf(sampleRateHz));
         });
 
-        setupVideoPlayer(eventChannel, textureEntry);
+//spectrumEventChannel.setStreamHandler(
+//        new EventChannel.StreamHandler() {
+//            @Override
+//            public void onListen(Object args, EventChannel.EventSink events) {
+//                Map<String, Object> event = new HashMap<>();
+//                event.put("event", "bufferingStart");
+//                events.success(event);
+//            }
+//
+//            @Override
+//            public void onCancel(Object args) {
+//                Log.w("TAG", "cancelling listener");
+//
+//            }}
+//);
+
+
+        setupVideoPlayer(eventChannel,  textureEntry);
     }
 
     private static boolean isHTTP(Uri uri) {
@@ -180,7 +199,7 @@ final class VideoPlayer {
     }
 
     private void setupVideoPlayer(
-            EventChannel eventChannel, TextureRegistry.SurfaceTextureEntry textureEntry) {
+            EventChannel eventChannel,  TextureRegistry.SurfaceTextureEntry textureEntry  ) {
         eventChannel.setStreamHandler(
                 new EventChannel.StreamHandler() {
                     @Override
@@ -197,6 +216,7 @@ final class VideoPlayer {
         surface = new Surface(textureEntry.surfaceTexture());
         exoPlayer.setVideoSurface(surface);
         setAudioAttributes(exoPlayer, options.mixWithOthers);
+
 
         exoPlayer.addListener(
                 new Listener() {

@@ -271,16 +271,18 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     }
 
     void spectrumErrorListener(Object obj) {
-      final PlatformException e = obj as PlatformException;
-      value = VideoPlayerValue.erroneous(e.message!);
-      _timer?.cancel();
-      if (!initializingCompleter.isCompleted) {
-        initializingCompleter.completeError(obj);
-      }
+      print("SpectrumError : $obj");
+      // final PlatformException e = obj as PlatformException;
+      // value = VideoPlayerValue.erroneous(e.message!);
+      // _timer?.cancel();
+      // if (!initializingCompleter.isCompleted) {
+      //   initializingCompleter.completeError(obj);
+      // }
     }
 
     void spectrumEventListener(VideoSpectrumEvent event) {
-      print(event);
+      // return VideoSpectrumEvent(sampleRateHz: 1, channelCount: 1, fft: [10,2]);
+      print("VideoSpectrumEvent is: $event");
     }
 
     _eventSubscription = _videoPlayerPlatform.videoEventsFor(_textureId).listen(eventListener, onError: errorListener);

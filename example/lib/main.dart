@@ -50,6 +50,9 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
       'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
     );
+    _controller.spectrum?.onData((data) {
+      print("data spectrum");
+    });
     // _controller.addListener(() {
     //   setState(() {});
     // });
