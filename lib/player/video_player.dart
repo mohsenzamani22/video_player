@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
+
 import 'src/closed_caption_file.dart';
+
 export 'src/closed_caption_file.dart';
 
 final VideoPlayerPlatform _videoPlayerPlatform = VideoPlayerPlatform.instance..init();
@@ -155,11 +157,14 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   final Future<ClosedCaptionFile>? closedCaptionFile;
 
+  StreamSubscription<VideoSpectrumEvent>? spectrum;
+
   ClosedCaptionFile? _closedCaptionFile;
   Timer? _timer;
   bool _isDisposed = false;
   Completer<void>? _creatingCompleter;
   StreamSubscription<dynamic>? _eventSubscription;
+
   late _VideoAppLifeCycleObserver _lifeCycleObserver;
 
   @visibleForTesting
@@ -265,7 +270,24 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       }
     }
 
+    void spectrumErrorListener(Object obj) {
+      final PlatformException e = obj as PlatformException;
+      value = VideoPlayerValue.erroneous(e.message!);
+      _timer?.cancel();
+      if (!initializingCompleter.isCompleted) {
+        initializingCompleter.completeError(obj);
+      }
+    }
+
+    void spectrumEventListener(VideoSpectrumEvent event) {
+      print(event);
+    }
+
     _eventSubscription = _videoPlayerPlatform.videoEventsFor(_textureId).listen(eventListener, onError: errorListener);
+    spectrum = _videoPlayerPlatform
+        .videoSpectrumEventsFor(_textureId)
+        .listen(spectrumEventListener, onError: spectrumErrorListener);
+
     return initializingCompleter.future;
   }
 

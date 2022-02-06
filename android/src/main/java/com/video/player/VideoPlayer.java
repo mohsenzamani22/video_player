@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Surface;
 
-import androidx.annotation.NonNull;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -35,24 +34,15 @@ import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.view.TextureRegistry;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +63,7 @@ final class VideoPlayer {
     private final QueuingEventSink eventSink = new QueuingEventSink();
 
     private final EventChannel eventChannel;
+    private final EventChannel spectrumEventChannel;
 
     private boolean isInitialized = false;
 
@@ -80,12 +71,14 @@ final class VideoPlayer {
 
     VideoPlayer(
             Context context,
+            EventChannel spectrumEventChannel,
             EventChannel eventChannel,
             TextureRegistry.SurfaceTextureEntry textureEntry,
             String dataSource,
             String formatHint,
             Map<String, String> httpHeaders,
             VideoPlayerOptions options) {
+        this.spectrumEventChannel = spectrumEventChannel;
         this.eventChannel = eventChannel;
         this.textureEntry = textureEntry;
         this.options = options;
@@ -119,10 +112,15 @@ final class VideoPlayer {
         MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, formatHint, context);
         exoPlayer.setMediaSource(mediaSource);
         exoPlayer.prepare();
+
+      spectrumEventChannel.setStreamHandler();
+
+
         fftAudioProcessor.setListener((sampleRateHz, channelCount, fft) -> {
             Log.d("Video", Arrays.toString(fft));
             Log.d("sampleRateHz", String.valueOf(sampleRateHz));
         });
+
         setupVideoPlayer(eventChannel, textureEntry);
     }
 

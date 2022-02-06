@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
+
 import 'method_channel_video_player.dart';
 
 /// The interface that implementations of video_player must implement.
@@ -44,8 +45,7 @@ abstract class VideoPlayerPlatform {
       try {
         instance._verifyProvidesDefaultImplementations();
       } on NoSuchMethodError catch (_) {
-        throw AssertionError(
-            'Platform interfaces must not be implemented with `implements`');
+        throw AssertionError('Platform interfaces must not be implemented with `implements`');
       }
     }
     _instance = instance;
@@ -72,6 +72,11 @@ abstract class VideoPlayerPlatform {
   /// Returns a Stream of [VideoEventType]s.
   Stream<VideoEvent> videoEventsFor(int textureId) {
     throw UnimplementedError('videoEventsFor() has not been implemented.');
+  }
+
+  /// Returns a Stream of [FTTDATA]s.
+  Stream<VideoSpectrumEvent> videoSpectrumEventsFor(int textureId) {
+    throw UnimplementedError('videoSpectrumEventsFor() has not been implemented.');
   }
 
   /// Sets the looping attribute of the video.
@@ -260,11 +265,32 @@ class VideoEvent {
   }
 
   @override
-  int get hashCode =>
-      eventType.hashCode ^
-      duration.hashCode ^
-      size.hashCode ^
-      buffered.hashCode;
+  int get hashCode => eventType.hashCode ^ duration.hashCode ^ size.hashCode ^ buffered.hashCode;
+}
+
+class VideoSpectrumEvent {
+  final int sampleRateHz;
+  final int channelCount;
+  final List<double> fft;
+
+  VideoSpectrumEvent({
+    required this.sampleRateHz,
+    required this.channelCount,
+    required this.fft,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is VideoSpectrumEvent &&
+            runtimeType == other.runtimeType &&
+            sampleRateHz == other.sampleRateHz &&
+            channelCount == other.channelCount &&
+            listEquals<double>(fft, other.fft);
+  }
+
+  @override
+  int get hashCode => sampleRateHz.hashCode ^ channelCount.hashCode ^ fft.hashCode;
 }
 
 /// Type of the event.
@@ -341,10 +367,7 @@ class DurationRange {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DurationRange &&
-          runtimeType == other.runtimeType &&
-          start == other.start &&
-          end == other.end;
+      other is DurationRange && runtimeType == other.runtimeType && start == other.start && end == other.end;
 
   @override
   int get hashCode => start.hashCode ^ end.hashCode;
