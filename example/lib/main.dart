@@ -50,16 +50,14 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
       'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
     );
-    _controller.spectrum?.onData((data) {
-      print("data spectrum");
-    });
-    // _controller.addListener(() {
-    //   setState(() {});
-    // });
-    _controller.spectrum?.onData((data) {});
+
     _controller.setLooping(true);
 
-    _controller.initialize();
+    _controller.initialize().then((value) {
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+        setState(() {});
+      });
+    });
   }
 
   @override
@@ -77,8 +75,8 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
           const Text('With remote mp4'),
           Container(
             padding: const EdgeInsets.all(20),
-            child: AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
+            child: SizedBox.square(
+              dimension: 250,
               child: Stack(
                 alignment: Alignment.bottomCenter,
                 children: <Widget>[
@@ -89,6 +87,17 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
                 ],
               ),
             ),
+          ),
+          StreamBuilder<VideoSpectrumEvent>(
+            // initialData: VideoSpectrumEvent(1600, 2,[10.2]),
+            stream: _controller.spectrum,
+            builder: (BuildContext context, AsyncSnapshot<VideoSpectrumEvent> snapshot) {
+              if (snapshot.hasData) {
+                return Text(snapshot.data.toString());
+              } else {
+                return Text("Waiting for new random number...");
+              }
+            },
           ),
         ],
       ),

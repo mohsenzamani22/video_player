@@ -157,13 +157,14 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   final Future<ClosedCaptionFile>? closedCaptionFile;
 
-  StreamSubscription<VideoSpectrumEvent>? spectrum;
+  // StreamSubscription<VideoSpectrumEvent>? spectrum;
 
   ClosedCaptionFile? _closedCaptionFile;
   Timer? _timer;
   bool _isDisposed = false;
   Completer<void>? _creatingCompleter;
   StreamSubscription<dynamic>? _eventSubscription;
+  Stream<VideoSpectrumEvent>? spectrum;
 
   late _VideoAppLifeCycleObserver _lifeCycleObserver;
 
@@ -173,6 +174,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   @visibleForTesting
   int get textureId => _textureId;
+
+  // Stream<VideoSpectrumEvent> get spectrum {
+  //   return _videoPlayerPlatform.videoSpectrumEventsFor(_textureId);
+  // }
 
   Future<void> initialize() async {
     _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
@@ -282,13 +287,11 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
     void spectrumEventListener(VideoSpectrumEvent event) {
       // return VideoSpectrumEvent(sampleRateHz: 1, channelCount: 1, fft: [10,2]);
-      print("VideoSpectrumEvent is: $event");
+      print("VideoSpectrumEvent is: ${event.toString()}");
     }
 
     _eventSubscription = _videoPlayerPlatform.videoEventsFor(_textureId).listen(eventListener, onError: errorListener);
-    spectrum = _videoPlayerPlatform
-        .videoSpectrumEventsFor(_textureId)
-        .listen(spectrumEventListener, onError: spectrumErrorListener);
+    spectrum = _videoPlayerPlatform.videoSpectrumEventsFor(_textureId);
 
     return initializingCompleter.future;
   }

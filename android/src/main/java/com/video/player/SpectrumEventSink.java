@@ -1,73 +1,43 @@
 package com.video.player;
 
-import java.util.ArrayList;
+import android.os.Handler;
+import android.os.Looper;
 
 import io.flutter.plugin.common.EventChannel;
 
 public class SpectrumEventSink implements EventChannel.EventSink{
-    private EventChannel.EventSink delegate;
-    private final ArrayList<Object> eventQueue = new ArrayList<>();
-    private boolean done = false;
+    private EventChannel.EventSink eventSink;
+    private Handler handler;
 
-    public void setDelegate(EventChannel.EventSink delegate) {
-        this.delegate = delegate;
-        maybeFlush();
-    }
-
-    @Override
-    public void endOfStream() {
-        enqueue(new SpectrumEventSink.EndOfStreamEvent());
-        maybeFlush();
-        done = true;
-    }
-
-    @Override
-    public void error(String code, String message, Object details) {
-        enqueue(new SpectrumEventSink.ErrorEvent(code, message, details));
-        maybeFlush();
+    public void  MainThreadEventSink(EventChannel.EventSink eventSink) {
+        this.eventSink = eventSink;
+        handler = new Handler(Looper.getMainLooper());
     }
 
     @Override
     public void success(Object event) {
-        enqueue(event);
-        maybeFlush();
-    }
+        if(handler == null) return;
 
-    private void enqueue(Object event) {
-        if (done) {
-            return;
-        }
-        eventQueue.add(event);
-    }
-
-    private void maybeFlush() {
-        if (delegate == null) {
-            return;
-        }
-        for (Object event : eventQueue) {
-            if (event instanceof SpectrumEventSink.EndOfStreamEvent) {
-                delegate.endOfStream();
-            } else if (event instanceof SpectrumEventSink.ErrorEvent) {
-                SpectrumEventSink.ErrorEvent errorEvent = (SpectrumEventSink.ErrorEvent) event;
-                delegate.error(errorEvent.code, errorEvent.message, errorEvent.details);
-            } else {
-                delegate.success(event);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                eventSink.success(event);
             }
-        }
-        eventQueue.clear();
+        });
     }
 
-    private static class EndOfStreamEvent {}
+    @Override
+    public void error(String errorCode, String errorMessage, Object errorDetails) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                eventSink.error(errorCode, errorMessage, errorDetails);
+            }
+        });
+    }
 
-    private static class ErrorEvent {
-        String code;
-        String message;
-        Object details;
+    @Override
+    public void endOfStream() {
 
-        ErrorEvent(String code, String message, Object details) {
-            this.code = code;
-            this.message = message;
-            this.details = details;
-        }
     }
 }

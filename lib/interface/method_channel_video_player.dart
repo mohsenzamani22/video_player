@@ -135,7 +135,7 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
       final Map<dynamic, dynamic> map = event;
       return VideoSpectrumEvent(
         channelCount: map["channelCount"],
-        fft: [],
+        fft: map["fft"],
         sampleRateHz: map["sampleRateHz"],
       );
     });

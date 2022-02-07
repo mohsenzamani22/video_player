@@ -47,6 +47,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 final class VideoPlayer {
     private static final String FORMAT_SS = "ss";
@@ -61,6 +64,7 @@ final class VideoPlayer {
     private final TextureRegistry.SurfaceTextureEntry textureEntry;
 
     private final QueuingEventSink eventSink = new QueuingEventSink();
+    private final SpectrumEventSink spectrumEventSink = new SpectrumEventSink();
 
     private final EventChannel eventChannel;
     private final EventChannel spectrumEventChannel;
@@ -112,35 +116,11 @@ final class VideoPlayer {
         MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, formatHint, context);
         exoPlayer.setMediaSource(mediaSource);
         exoPlayer.prepare();
-        fftAudioProcessor.setListener((sampleRateHz, channelCount, fft) -> {
-            Map<String, Object> event = new HashMap<>();
-            event.put("sampleRateHz", sampleRateHz);
-            event.put("channelCount", channelCount);
-            event.put("fft", fft);
-
-            Log.d("data ", event.toString());
-//            Log.d("Video", Arrays.toString(fft));
-//            Log.d("sampleRateHz", String.valueOf(sampleRateHz));
-        });
-
-//spectrumEventChannel.setStreamHandler(
-//        new EventChannel.StreamHandler() {
-//            @Override
-//            public void onListen(Object args, EventChannel.EventSink events) {
-//                Map<String, Object> event = new HashMap<>();
-//                event.put("event", "bufferingStart");
-//                events.success(event);
-//            }
-//
-//            @Override
-//            public void onCancel(Object args) {
-//                Log.w("TAG", "cancelling listener");
-//
-//            }}
-//);
 
 
-        setupVideoPlayer(eventChannel,  textureEntry);
+
+
+        setupVideoPlayer(eventChannel, spectrumEventChannel, fftAudioProcessor,  textureEntry);
     }
 
     private static boolean isHTTP(Uri uri) {
@@ -197,9 +177,8 @@ final class VideoPlayer {
             }
         }
     }
-
     private void setupVideoPlayer(
-            EventChannel eventChannel,  TextureRegistry.SurfaceTextureEntry textureEntry  ) {
+            EventChannel eventChannel, EventChannel spectrumEventChannel, FFTAudioProcessor fftAudioProcessor, TextureRegistry.SurfaceTextureEntry textureEntry) {
         eventChannel.setStreamHandler(
                 new EventChannel.StreamHandler() {
                     @Override
@@ -212,12 +191,47 @@ final class VideoPlayer {
                         eventSink.setDelegate(null);
                     }
                 });
+        spectrumEventChannel.setStreamHandler(
+                new EventChannel.StreamHandler() {
+                    @Override
+                    public void onListen(Object o, EventChannel.EventSink sink) {
+                        spectrumEventSink.MainThreadEventSink(sink);
+                    }
 
+                    @Override
+                    public void onCancel(Object o) {
+//                        spectrumEventSink.MainThreadEventSink(null);
+                    }
+                });
         surface = new Surface(textureEntry.surfaceTexture());
         exoPlayer.setVideoSurface(surface);
         setAudioAttributes(exoPlayer, options.mixWithOthers);
 
 
+
+//        fftAudioProcessor.setListener((sampleRateHz, channelCount, fft) -> {
+//            Map<String, Object> event = new HashMap<>();
+//            event.put("sampleRateHz", sampleRateHz);
+//            event.put("channelCount", channelCount);
+//            event.put("fft", fft);
+//
+////            new Handler().post(new Runnable() {
+////                @Override
+////                public void run() {
+////                    spectrumEventSink.success(event);
+////
+////                }
+////            });
+//        });
+//
+//        for (int i = 0; i < 5000; i++) {
+//            Map<String, Object> event = new HashMap<>();
+//            float[] f = {10.10f,30.3f,40.60f,77.50f};
+//            event.put("sampleRateHz", 10);
+//            event.put("channelCount", 100);
+//            event.put("fft", f);
+//            spectrumEventSink.success(event);
+//        }
         exoPlayer.addListener(
                 new Listener() {
                     private boolean isBuffering = false;
@@ -252,6 +266,8 @@ final class VideoPlayer {
                         }
                     }
                 });
+        fftAudioProcessor.setListener(this::onFFTReady);
+
     }
 
     void sendBufferingUpdate() {
@@ -335,5 +351,13 @@ final class VideoPlayer {
         if (exoPlayer != null) {
             exoPlayer.release();
         }
+    }
+
+    private void onFFTReady(int sampleRateHz, int channelCount, float[] fft) {
+        Map<String, Object> event = new HashMap<>();
+        event.put("sampleRateHz", sampleRateHz);
+        event.put("channelCount", channelCount);
+        event.put("fft", fft);
+        spectrumEventSink.success(event);
     }
 }

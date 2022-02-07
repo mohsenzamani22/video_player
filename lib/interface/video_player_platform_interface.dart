@@ -291,6 +291,11 @@ class VideoSpectrumEvent {
 
   @override
   int get hashCode => sampleRateHz.hashCode ^ channelCount.hashCode ^ fft.hashCode;
+
+  @override
+  String toString() {
+    return "sampleRateHz: $sampleRateHz, channelCount: $channelCount, fft: ${fft.toString()}";
+  }
 }
 
 /// Type of the event.
