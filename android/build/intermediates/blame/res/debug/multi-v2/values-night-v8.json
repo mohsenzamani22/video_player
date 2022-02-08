@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "G:\\video_player\\android\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-night-v8\\values-night-v8.xml",
+            "outputFile": "C:\\Users\\Mhwmd2\\StudioProjects\\video_player\\android\\build\\intermediates\\res\\merged\\debug\\values-night-v8\\values-night-v8.xml",
             "map": [
                 {
-                    "source": "G:\\video_player\\android\\src\\main\\res\\values-night\\styles.xml",
+                    "source": "C:\\Users\\Mhwmd2\\StudioProjects\\video_player\\android\\src\\main\\res\\values-night\\styles.xml",
                     "from": {
                         "startLines": "3,14",
                         "startColumns": "4,4",
@@ -25,10 +25,10 @@
             ]
         },
         {
-            "outputFile": "G:\\video_player\\android\\build\\intermediates\\res\\merged\\debug\\values-night-v8\\values-night-v8.xml",
+            "outputFile": "C:\\Users\\Mhwmd2\\StudioProjects\\video_player\\android\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-night-v8\\values-night-v8.xml",
             "map": [
                 {
-                    "source": "G:\\video_player\\android\\src\\main\\res\\values-night\\styles.xml",
+                    "source": "C:\\Users\\Mhwmd2\\StudioProjects\\video_player\\android\\src\\main\\res\\values-night\\styles.xml",
                     "from": {
                         "startLines": "3,14",
                         "startColumns": "4,4",

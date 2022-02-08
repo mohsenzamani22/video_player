@@ -3,6 +3,6 @@
 3    package="com.player.video" >
 4
 5    <uses-sdk android:minSdkVersion="16" />
-5-->G:\video_player\android\src\main\AndroidManifest.xml
+5-->C:\Users\Mhwmd2\StudioProjects\video_player\android\src\main\AndroidManifest.xml
 6
 7</manifest>

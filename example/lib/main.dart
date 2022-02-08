@@ -1,5 +1,6 @@
 import 'package:cache_video_player/interface/video_player_platform_interface.dart';
 import 'package:cache_video_player/player/video_player.dart';
+import 'package:example/FFTBand.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -46,8 +47,9 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   @override
   void initState() {
     super.initState();
+
     _controller = VideoPlayerController.network(
-      'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
+      'https://as11.cdn.asset.aparat.com/aparat-video/d064a6361ddb68d4e80e75fe43d06fb822809484-144p.mp4?wmsAuthSign=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6Ijc2NmJmNDFlN2U4OGQyMzc3OTI4MDcxY2ExZGI4MTY0IiwiZXhwIjoxNjQ0MzM4MDMwLCJpc3MiOiJTYWJhIElkZWEgR1NJRyJ9.Gbs5ZMhF7PzF87ruOe6yz7EZwgUgB27gC5LZSgAB49s',
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
     );
 
@@ -91,9 +93,11 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
           StreamBuilder<VideoSpectrumEvent>(
             // initialData: VideoSpectrumEvent(1600, 2,[10.2]),
             stream: _controller.spectrum,
-            builder: (BuildContext context, AsyncSnapshot<VideoSpectrumEvent> snapshot) {
+            builder: (BuildContext context,
+                AsyncSnapshot<VideoSpectrumEvent> snapshot) {
+              // print("fft data: ${snapshot.data?.fft}");
               if (snapshot.hasData) {
-                return Text(snapshot.data.toString());
+                return FFTBand(spectrumEvent: snapshot.data);
               } else {
                 return Text("Waiting for new random number...");
               }
@@ -106,7 +110,8 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
 }
 
 class _ControlsOverlay extends StatelessWidget {
-  const _ControlsOverlay({Key? key, required this.controller}) : super(key: key);
+  const _ControlsOverlay({Key? key, required this.controller})
+      : super(key: key);
 
   static const _exampleCaptionOffsets = [
     Duration(seconds: -10),
