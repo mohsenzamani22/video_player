@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:blobs/blobs.dart';
 import 'package:cache_video_player/interface/video_player_platform_interface.dart';
 import 'package:flutter/material.dart';
 
@@ -61,12 +62,13 @@ class _FFTBandState extends State<FFTBand> {
     super.initState();
   }
 
-  double coerceAtMost(double target, double maximumValue) =>
-      target > maximumValue ? maximumValue : target;
-  getAudio() {
-    List.copyRange(fft, 0, widget.spectrumEvent?.fft ?? [], 0, size);
-    // print("fft: ${fft.length}, fft: ${widget.spectrumEvent?.fft}");
+  double coerceAtMost(double target, double maximumValue) {
+    return target > maximumValue ? maximumValue : target;
+  }
 
+  List<double> getAudio(double width, double height) {
+    fft.setRange(0, size, widget.spectrumEvent?.fft ?? [], 2);
+    List<double> bars = [];
     int currentFftPosition = 0;
     int currentFrequencyBandLimitIndex = 0;
 
@@ -121,27 +123,57 @@ class _FFTBandState extends State<FFTBand> {
       currentAverage += smoothedAccum / bands;
 
       double leftX =
-          _size.width * (currentFrequencyBandLimitIndex / bands.toDouble());
-      double rightX = leftX + _size.width / bands.toDouble();
+          width * (currentFrequencyBandLimitIndex / bands.toDouble());
+      double rightX = leftX + width / bands.toDouble();
 
-      double barHeight = (_size.height *
-              coerceAtMost(smoothedAccum / maxConst.toDouble(), 1.0))
-          .toDouble();
-      double top = _size.height - barHeight;
-      print(
-          "currentAverage: $currentAverage, barHeight: $barHeight, leftX: $leftX, rightX: $rightX");
+      double barHeight =
+          (height * coerceAtMost(smoothedAccum / maxConst.toDouble(), 1.0))
+              .toDouble();
+      double top = height - barHeight;
+      bars.add(barHeight);
+      // String line = "-" * barHeight.toInt();
+      // print(line);
+      // print(
+      //     "currentAverage: $currentAverage, barHeight: $barHeight, leftX: $leftX, rightX: $rightX");
       currentFrequencyBandLimitIndex++;
     }
+    return bars;
   }
 
   @override
   Widget build(BuildContext context) {
     _size = MediaQuery.of(context).size;
-    getAudio();
-    return Container(
+    List<double> a = getAudio(_size.width, 100);
+    print(a[1]);
+    return SizedBox(
       height: 100,
-      width: 100,
-      color: Colors.red,
+      width: _size.width,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+        // mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: a
+            .map((e) => Container(
+                  width: 10,
+                  height: e,
+                  color: Colors.red,
+                  // duration: Duration(milliseconds: 500),
+                ))
+            .toList(),
+      ),
     );
+    // return SizedBox.square(
+    //   dimension: 200,
+    //   child: CustomPaint(
+    //     painter: BlobPainter(
+    //       blobData: BlobGenerator(
+    //         // id: '18-9-10',
+    //         size: Size(200, 200),
+    //       ).generate(),
+    //       // debug: true,
+    //     ),
+    //   ),
+    // );
   }
 }
