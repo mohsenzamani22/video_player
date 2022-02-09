@@ -2,6 +2,7 @@ import 'package:blobs/blobs.dart';
 import 'package:cache_video_player/interface/video_player_platform_interface.dart';
 import 'package:cache_video_player/player/video_player.dart';
 import 'package:example/FFTBand.dart';
+import 'package:example/RotateInpirationExample.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -44,13 +45,14 @@ class _BumbleBeeRemoteVideo extends StatefulWidget {
 
 class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   late VideoPlayerController _controller;
-
+  late BlobController blobCtrl;
   @override
   void initState() {
     super.initState();
 
+    blobCtrl = BlobController();
     _controller = VideoPlayerController.network(
-      'https://dv174.toakiiikarrrt.xyz/dl/2VeYkS6FfM8/1644333730/0db2f6ffc5d1d467c1330aa429f64b65efbf9ca541e74f810bc6286c4b5149a8?file=aHR0cHM6Ly9ycjEtLS1zbi00ZzVlNm5zei5nb29nbGV2aWRlby5jb20vdmlkZW9wbGF5YmFjaz9leHBpcmU9MTY0NDMzMTc4MyZlaT1weTRDWXNyT012LUI2ZHNQODRTbTRBVSZpcD0xOTUuMjAxLjEwOS4yOSZpZD1vLUFEWFlZMmduZS1hTlAtYm4xaGxvdS0yLTd0ejkwcFI1bGJzRHM2bDBYUnVUJml0YWc9MjImc291cmNlPXlvdXR1YmUmcmVxdWlyZXNzbD15ZXMmbWg9SXgmbW09MzElMkMyOSZtbj1zbi00ZzVlNm5zeiUyQ3NuLTRnNWVkbnN5Jm1zPWF1JTJDcmR1Jm12PW0mbXZpPTEmcGw9MjUmdnBydj0xJm1pbWU9dmlkZW8lMkZtcDQmY25yPTE0JnJhdGVieXBhc3M9eWVzJmR1cj0yMDQuNjM3JmxtdD0xNjA4OTg5MzQ3MzI1MDE0Jm10PTE2NDQzMDk5MDEmZnZpcD0xJmZleHA9MjQwMDEzNzMlMkMyNDAwNzI0NiZjPUFORFJPSUQmdHhwPTU1MzU0MzImc3BhcmFtcz1leHBpcmUlMkNlaSUyQ2lwJTJDaWQlMkNpdGFnJTJDc291cmNlJTJDcmVxdWlyZXNzbCUyQ3ZwcnYlMkNtaW1lJTJDY25yJTJDcmF0ZWJ5cGFzcyUyQ2R1ciUyQ2xtdCZzaWc9QU9xMFFKOHdSUUlnSDBVZDdReWlaNjh2QmszajRrSEtTV1FZTGQwSDQtU013ekVRRFhDTDg4VUNJUURyWWcwZkVNeU52MkZKekFzUWVpOHQzLTh3UElDbTNfSmdsT0NieTAxZ2hBJTNEJTNEJmxzcGFyYW1zPW1oJTJDbW0lMkNtbiUyQ21zJTJDbXYlMkNtdmklMkNwbCZsc2lnPUFHM0NfeEF3UkFJZ0w0SFZvcXBxVVE0aUI5Y0hXR1dqdms3RElOMWpCQlg2TTFvYVFZNmN1WTBDSUhCRGxNVzVGYjZRT3VHajhUZmx1M08tRHkzSlMySTNGeU9xSVN4Y0diVlAmaG9zdD1ycjEtLS1zbi00ZzVlNm5zei5nb29nbGV2aWRlby5jb20mbmFtZT15dDVzLmNvbS1HdXN0YXZvK1NhbnRhb2xhbGxhKy0rQmFiZWwrKE90bmlja2ErUmVtaXgpKyU3YytUb20rSGFyZHkrJTI3VGhlK0dhbmdzdGVyJTI3KDcyMHApLm1wNA',
+      'https://046401bd-post-video.s3.ir-thr-at1.arvanstorage.com/df429f69-9a69-4e18-b23c-7d424c0d2edf729c8.mp4',
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
     );
 
@@ -104,6 +106,7 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
               }
             },
           ),
+          RotateInpirationExample(),
         ],
       ),
     );

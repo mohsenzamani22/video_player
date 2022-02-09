@@ -18,7 +18,7 @@ class _FFTBandState extends State<FFTBand> {
   final List<double> FREQUENCY_BAND_LIMITS = const [
     20,
     25,
-    32,
+    31.5,
     40,
     50,
     63,
@@ -51,12 +51,13 @@ class _FFTBandState extends State<FFTBand> {
 
   late int bands = FREQUENCY_BAND_LIMITS.length;
   late int size = SAMPLE_SIZE ~/ 2;
-  final int maxConst = 25000;
+  final int maxConst = 4000;
   late List<double> fft = List.filled(size, 0.0);
   final int smoothingFactor = 3;
   late List<double> previousValues = List.filled(bands * smoothingFactor, 0.0);
   int startedAt = 0;
   late Size _size;
+
   @override
   void initState() {
     super.initState();
@@ -73,30 +74,27 @@ class _FFTBandState extends State<FFTBand> {
     int currentFrequencyBandLimitIndex = 0;
 
     double currentAverage = 0;
-
+    print("-" * 100);
     while (currentFftPosition < size) {
       double accum = 0;
 
       int nextLimitAtPosition =
-          (FREQUENCY_BAND_LIMITS[currentFrequencyBandLimitIndex] /
-                  20000.0 *
-                  size)
+          (FREQUENCY_BAND_LIMITS[currentFrequencyBandLimitIndex] / 20000 * size)
               .floor()
               .toInt();
 
       for (int j = 0; j < (nextLimitAtPosition - currentFftPosition); j += 2) {
-        double raw = (math.pow(fft[currentFftPosition + j].toDouble(), 2.0) +
-                math.pow(fft[currentFftPosition + j + 1].toDouble(), 2.0))
+        double raw = (math.pow(fft[currentFftPosition + j], 2.0) +
+                math.pow(fft[currentFftPosition + j + 1], 2.0))
             .toDouble();
 
         double m = bands / 2;
         double windowed = raw *
             (0.54 +
-                    0.46 *
-                        math.cos((currentFrequencyBandLimitIndex - m) *
-                            math.pi /
-                            (m + 1)))
-                .toDouble();
+                0.46 *
+                    math.cos((currentFrequencyBandLimitIndex - m) *
+                        math.pi /
+                        (m + 1)));
         accum += windowed;
       }
 
@@ -121,22 +119,19 @@ class _FFTBandState extends State<FFTBand> {
       smoothedAccum /= (smoothingFactor + 1);
 
       currentAverage += smoothedAccum / bands;
+      // double leftX = width * (currentFrequencyBandLimitIndex / bands);
+      // double rightX = leftX + width / bands;
+      // double top = height - barHeight;
 
-      double leftX =
-          width * (currentFrequencyBandLimitIndex / bands.toDouble());
-      double rightX = leftX + width / bands.toDouble();
-
-      double barHeight =
-          (height * coerceAtMost(smoothedAccum / maxConst.toDouble(), 1.0))
-              .toDouble();
-      double top = height - barHeight;
+      double barHeight = (height * coerceAtMost(smoothedAccum / maxConst, 1.0));
+      print("barHeight: $barHeight");
       bars.add(barHeight);
-      // String line = "-" * barHeight.toInt();
-      // print(line);
-      // print(
-      //     "currentAverage: $currentAverage, barHeight: $barHeight, leftX: $leftX, rightX: $rightX");
+
       currentFrequencyBandLimitIndex++;
     }
+    print("-" * 100);
+
+    print("avg: ${height * (1 - (currentAverage / maxConst))}");
     return bars;
   }
 
@@ -144,7 +139,6 @@ class _FFTBandState extends State<FFTBand> {
   Widget build(BuildContext context) {
     _size = MediaQuery.of(context).size;
     List<double> a = getAudio(_size.width, 100);
-    print(a[1]);
     return SizedBox(
       height: 100,
       width: _size.width,
@@ -163,17 +157,5 @@ class _FFTBandState extends State<FFTBand> {
             .toList(),
       ),
     );
-    // return SizedBox.square(
-    //   dimension: 200,
-    //   child: CustomPaint(
-    //     painter: BlobPainter(
-    //       blobData: BlobGenerator(
-    //         // id: '18-9-10',
-    //         size: Size(200, 200),
-    //       ).generate(),
-    //       // debug: true,
-    //     ),
-    //   ),
-    // );
   }
 }
