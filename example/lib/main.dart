@@ -1,8 +1,6 @@
-import 'package:blobs/blobs.dart';
 import 'package:cache_video_player/interface/video_player_platform_interface.dart';
 import 'package:cache_video_player/player/video_player.dart';
 import 'package:example/FFTBand.dart';
-import 'package:example/RotateInpirationExample.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -45,12 +43,11 @@ class _BumbleBeeRemoteVideo extends StatefulWidget {
 
 class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   late VideoPlayerController _controller;
-  late BlobController blobCtrl;
+
   @override
   void initState() {
     super.initState();
 
-    blobCtrl = BlobController();
     _controller = VideoPlayerController.network(
       'https://046401bd-post-video.s3.ir-thr-at1.arvanstorage.com/df429f69-9a69-4e18-b23c-7d424c0d2edf729c8.mp4',
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
@@ -106,7 +103,9 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
               }
             },
           ),
-          RotateInpirationExample(),
+          SizedBox.square(
+            dimension: 200,
+          )
         ],
       ),
     );

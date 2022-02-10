@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:blobs/blobs.dart';
 import 'package:cache_video_player/interface/video_player_platform_interface.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'blobs.dart';
 
 class FFTBand extends StatefulWidget {
   final VideoSpectrumEvent? spectrumEvent;
@@ -53,11 +55,12 @@ class _FFTBandState extends State<FFTBand> {
   late int size = SAMPLE_SIZE ~/ 2;
   final int maxConst = 4000;
   late List<double> fft = List.filled(size, 0.0);
-  final int smoothingFactor = 3;
+  final int smoothingFactor = 1;
   late List<double> previousValues = List.filled(bands * smoothingFactor, 0.0);
   int startedAt = 0;
   late Size _size;
-
+  final int minGrowth = 8;
+  final Size spectrumSize = Size(200, 200);
   @override
   void initState() {
     super.initState();
@@ -67,14 +70,15 @@ class _FFTBandState extends State<FFTBand> {
     return target > maximumValue ? maximumValue : target;
   }
 
-  List<double> getAudio(double width, double height) {
+  Map<String, dynamic> getAudio(double width, double height) {
+    Map<String, dynamic> res = {};
+    print(widget.spectrumEvent?.fft);
     fft.setRange(0, size, widget.spectrumEvent?.fft ?? [], 2);
     List<double> bars = [];
     int currentFftPosition = 0;
     int currentFrequencyBandLimitIndex = 0;
 
     double currentAverage = 0;
-    print("-" * 100);
     while (currentFftPosition < size) {
       double accum = 0;
 
@@ -124,38 +128,127 @@ class _FFTBandState extends State<FFTBand> {
       // double top = height - barHeight;
 
       double barHeight = (height * coerceAtMost(smoothedAccum / maxConst, 1.0));
-      print("barHeight: $barHeight");
       bars.add(barHeight);
 
       currentFrequencyBandLimitIndex++;
     }
-    print("-" * 100);
 
-    print("avg: ${height * (1 - (currentAverage / maxConst))}");
-    return bars;
+    res = {
+      "avg": height * (1 - (currentAverage / maxConst)),
+      "bar": bars,
+    };
+    return res;
+  }
+
+  double degreeToRadian(double degree) {
+    return degree * (math.pi / 180);
+  }
+
+  double radianToDegree(double radian) {
+    return radian * (180 / math.pi);
+  }
+
+  List<double> getOriginalPoints(int bands_length) {
+    final deg = 360 / bands_length;
+    return List.generate(bands_length, (index) => index * deg);
+  }
+
+  Offset point(Offset origin, double radius, double degree) {
+    double x = origin.dx + (radius * math.cos(degreeToRadian(degree)));
+    double y = origin.dy + (radius * math.sin(degreeToRadian(degree)));
+    return Offset(x.round().toDouble(), y.round().toDouble());
+  }
+
+  double magicPoint(double value, double min, double max) {
+    double radius = min + (value * (max - min));
+    if (radius > max) {
+      radius = radius - min;
+    } else if (radius < min) {
+      radius = radius + min;
+    }
+    return radius;
+  }
+
+  List<Offset> getDestPoints(List<double> a) {
+    double outerRad = spectrumSize.width / 2;
+    double innerRad = minGrowth * (outerRad / 10);
+    Offset center = Offset(spectrumSize.width / 2, spectrumSize.height / 2);
+
+    List<double> slices = getOriginalPoints(a.length);
+    List<Offset> originPoints = [];
+    List<Offset> destPoints = [];
+    int i = 0;
+
+    for (var degree in slices) {
+      double O = magicPoint(a[i], innerRad, outerRad);
+      Offset start = point(center, innerRad, degree);
+      Offset end = point(center, O, degree);
+      originPoints.add(start);
+      destPoints.add(end);
+      i++;
+    }
+    return destPoints;
   }
 
   @override
   Widget build(BuildContext context) {
     _size = MediaQuery.of(context).size;
-    List<double> a = getAudio(_size.width, 100);
-    return SizedBox(
-      height: 100,
-      width: _size.width,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-        // mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: a
-            .map((e) => Container(
-                  width: 10,
-                  height: e,
-                  color: Colors.red,
-                  // duration: Duration(milliseconds: 500),
-                ))
-            .toList(),
-      ),
+    Map<String, dynamic> a = getAudio(_size.width, 1);
+    // print(a["avg"]);
+    return Stack(
+      children: [
+        SizedBox(
+          height: spectrumSize.height,
+          width: spectrumSize.width,
+          child: CustomPaint(
+            painter: BlobPainter(
+              debug: false,
+              styles: BlobStyles(
+                color: Color(0x40002AFF),
+              ),
+              // debug: true,
+              blobData: BlobGenerator(
+                edgesCount: (a["bar"] as List<double>).length,
+                minGrowth: minGrowth,
+                size: spectrumSize,
+              ).generateFromPoints(getDestPoints((a["bar"] as List<double>))),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: spectrumSize.height,
+          width: spectrumSize.width,
+          child: Transform.scale(
+            scale: math.min(math.max(.5, a["avg"]), 1.5),
+            child: CustomPaint(
+              painter: BlobPainter(
+                debug: false,
+                styles: BlobStyles(
+                  color: Color(0x40002AFF),
+                ),
+                // debug: true,
+                blobData: BlobGenerator(
+                  edgesCount: (a["bar"] as List<double>).length,
+                  minGrowth: minGrowth,
+                  size: spectrumSize,
+                ).generateFromPoints(getDestPoints(
+                    (a["bar"] as List<double>).reversed.toList())),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: spectrumSize.height,
+          width: spectrumSize.width,
+          child: UnconstrainedBox(
+            child: Image.network(
+              "https://upermall.ir/assets/favicon.png",
+              height: 100 / 2,
+              width: 100 / 2,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
