@@ -101,7 +101,7 @@ class SpectrumPainter extends CustomPainter {
     paint.strokeWidth = 3;
     paint.style = PaintingStyle.stroke;
 
-    var path = Path();
+    Path path = Path();
     path.addOval(Rect.fromCircle(
       center: center,
       radius: radius,
@@ -116,7 +116,7 @@ class SpectrumPainter extends CustomPainter {
     paint.style = PaintingStyle.fill;
     paint.strokeCap = StrokeCap.round;
 
-    var path = Path();
+    Path path = Path();
     path.addOval(Rect.fromCircle(
       center: center,
       radius: 3,

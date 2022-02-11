@@ -49,7 +49,6 @@ class _FFTBandState extends State<FFTBand> {
     16000,
     20000
   ];
-  late Size _screenSize;
 
   late int bands = FREQUENCY_BAND_LIMITS.length;
   late int size = SAMPLE_SIZE ~/ 2;
@@ -60,7 +59,7 @@ class _FFTBandState extends State<FFTBand> {
   final int smoothingFactor = 3;
   int startedAt = 0;
   final int minGrowth = 8;
-  final Size spectrumSize = const Size(100, 100);
+  final Size _defaultSpectrumSize = const Size(100, 100);
 
   @override
   void initState() {
@@ -130,11 +129,10 @@ class _FFTBandState extends State<FFTBand> {
   @override
   Widget build(BuildContext context) {
     Map<String, dynamic> spectrum = analyzeFFTData(1);
-    return Stack(
-      children: [
-        SizedBox.fromSize(
-          size: spectrumSize,
-          child: CustomPaint(
+    return FittedBox(
+      child: Stack(
+        children: [
+          CustomPaint(
             painter: SpectrumPainter(
               color: Color(0xff4ac7b7).withOpacity(.5),
               paintingStyle: PaintingStyle.fill,
@@ -142,14 +140,13 @@ class _FFTBandState extends State<FFTBand> {
               minGrowth: minGrowth,
             ),
             isComplex: true,
+            size: _defaultSpectrumSize,
           ),
-        ),
-        SizedBox.fromSize(
-          size: spectrumSize,
-          child: Transform.rotate(
+          Transform.rotate(
             angle: -math.pi / (spectrum["avg"] * 2),
+            alignment: Alignment.center,
             child: CustomPaint(
-              painter: SpectrumPainter(
+              foregroundPainter: SpectrumPainter(
                 // debug: true,
                 color: Color(0xff0092ff).withOpacity(.5),
 
@@ -157,21 +154,22 @@ class _FFTBandState extends State<FFTBand> {
                 spectrumData: spectrum["bars"] as List<double>,
                 minGrowth: minGrowth,
               ),
+              size: _defaultSpectrumSize,
               isComplex: true,
             ),
           ),
-        ),
-        SizedBox.fromSize(
-          size: spectrumSize,
-          child: UnconstrainedBox(
-            child: Image.network(
-              "https://upermall.ir/assets/favicon.png",
-              height: spectrumSize.height / 2,
-              width: spectrumSize.width / 2,
+          SizedBox.fromSize(
+            size: _defaultSpectrumSize,
+            child: UnconstrainedBox(
+              child: Image.network(
+                "https://upermall.ir/assets/favicon.png",
+                height: _defaultSpectrumSize.height / 2,
+                width: _defaultSpectrumSize.width / 2,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
