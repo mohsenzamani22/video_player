@@ -10,28 +10,11 @@ void main() {
 class _App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 1,
-      child: Scaffold(
-        key: const ValueKey<String>('home_page'),
-        appBar: AppBar(
-          title: const Text('Video player example'),
-          bottom: const TabBar(
-            isScrollable: true,
-            tabs: <Widget>[
-              Tab(
-                icon: Icon(Icons.cloud),
-                text: "Remote",
-              ),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: <Widget>[
-            _BumbleBeeRemoteVideo(),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Video player example'),
       ),
+      body: _BumbleBeeRemoteVideo(),
     );
   }
 }
@@ -55,6 +38,7 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
     );
 
     _controller.setLooping(true);
+    _controller.initialize().then((value) => setState(() {}));
   }
 
   @override
@@ -69,10 +53,20 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
       child: Column(
         children: <Widget>[
           Container(padding: const EdgeInsets.only(top: 20.0)),
+          StreamBuilder<VideoSpectrumEvent>(
+            stream: _controller.spectrum,
+            builder: (BuildContext context, AsyncSnapshot<VideoSpectrumEvent> snapshot) {
+              if (snapshot.hasData) {
+                return FFTBand(spectrumEvent: snapshot.data);
+              } else {
+                return Text("Waiting for play video...");
+              }
+            },
+          ),
           Container(
             padding: const EdgeInsets.all(20),
-            child: SizedBox.square(
-              dimension: 250,
+            child: AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
               child: Stack(
                 alignment: Alignment.bottomCenter,
                 children: <Widget>[
@@ -83,21 +77,6 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
                 ],
               ),
             ),
-          ),
-          FutureBuilder(
-            builder: (context, snapshot) {
-              return StreamBuilder<VideoSpectrumEvent>(
-                stream: _controller.spectrum,
-                builder: (BuildContext context, AsyncSnapshot<VideoSpectrumEvent> snapshot) {
-                  if (snapshot.hasData) {
-                    return FFTBand(spectrumEvent: snapshot.data);
-                  } else {
-                    return Text("Waiting for play video...");
-                  }
-                },
-              );
-            },
-            future: _controller.initialize(),
           ),
           SizedBox.square(
             dimension: 200,

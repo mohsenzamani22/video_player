@@ -200,7 +200,7 @@ final class VideoPlayer {
 
                     @Override
                     public void onCancel(Object o) {
-//                        spectrumEventSink.MainThreadEventSink(null);
+                        spectrumEventSink.MainThreadEventSink(null);
                     }
                 });
         surface = new Surface(textureEntry.surfaceTexture());
@@ -208,30 +208,6 @@ final class VideoPlayer {
         setAudioAttributes(exoPlayer, options.mixWithOthers);
 
 
-
-//        fftAudioProcessor.setListener((sampleRateHz, channelCount, fft) -> {
-//            Map<String, Object> event = new HashMap<>();
-//            event.put("sampleRateHz", sampleRateHz);
-//            event.put("channelCount", channelCount);
-//            event.put("fft", fft);
-//
-////            new Handler().post(new Runnable() {
-////                @Override
-////                public void run() {
-////                    spectrumEventSink.success(event);
-////
-////                }
-////            });
-//        });
-//
-//        for (int i = 0; i < 5000; i++) {
-//            Map<String, Object> event = new HashMap<>();
-//            float[] f = {10.10f,30.3f,40.60f,77.50f};
-//            event.put("sampleRateHz", 10);
-//            event.put("channelCount", 100);
-//            event.put("fft", f);
-//            spectrumEventSink.success(event);
-//        }
         exoPlayer.addListener(
                 new Listener() {
                     private boolean isBuffering = false;
@@ -345,6 +321,7 @@ final class VideoPlayer {
         }
         textureEntry.release();
         eventChannel.setStreamHandler(null);
+        spectrumEventChannel.setStreamHandler(null);
         if (surface != null) {
             surface.release();
         }
