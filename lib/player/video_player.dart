@@ -309,6 +309,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       _lifeCycleObserver.dispose();
     }
     _isDisposed = true;
+
     super.dispose();
   }
 

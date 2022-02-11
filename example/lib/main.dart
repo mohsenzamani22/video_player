@@ -50,16 +50,11 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
 
     _controller = VideoPlayerController.network(
       'https://046401bd-post-video.s3.ir-thr-at1.arvanstorage.com/df429f69-9a69-4e18-b23c-7d424c0d2edf729c8.mp4',
+      // 'https://as10.cdn.asset.aparat.com/aparat-video/f1154d8132af75f5a4b6eb35f6b430a622216822-240p.mp4?wmsAuthSign=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6Ijg2MDJjNjJkMmFiYmNiMzc5ODFmYzA2ZjBlOGMwMDhkIiwiZXhwIjoxNjQ0NTYzODQ2LCJpc3MiOiJTYWJhIElkZWEgR1NJRyJ9.06lxphXJCQ7k9nVQWZZstTunwQWd05rVdaT-7H8nvGA',
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
     );
 
     _controller.setLooping(true);
-
-    _controller.initialize().then((value) {
-      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-        setState(() {});
-      });
-    });
   }
 
   @override
@@ -74,7 +69,6 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
       child: Column(
         children: <Widget>[
           Container(padding: const EdgeInsets.only(top: 20.0)),
-          const Text('With remote mp4'),
           Container(
             padding: const EdgeInsets.all(20),
             child: SizedBox.square(
@@ -90,18 +84,20 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
               ),
             ),
           ),
-          StreamBuilder<VideoSpectrumEvent>(
-            // initialData: VideoSpectrumEvent(1600, 2,[10.2]),
-            stream: _controller.spectrum,
-            builder: (BuildContext context,
-                AsyncSnapshot<VideoSpectrumEvent> snapshot) {
-              // print("fft data: ${snapshot.data?.fft}");
-              if (snapshot.hasData) {
-                return FFTBand(spectrumEvent: snapshot.data);
-              } else {
-                return Text("Waiting for new random number...");
-              }
+          FutureBuilder(
+            builder: (context, snapshot) {
+              return StreamBuilder<VideoSpectrumEvent>(
+                stream: _controller.spectrum,
+                builder: (BuildContext context, AsyncSnapshot<VideoSpectrumEvent> snapshot) {
+                  if (snapshot.hasData) {
+                    return FFTBand(spectrumEvent: snapshot.data);
+                  } else {
+                    return Text("Waiting for play video...");
+                  }
+                },
+              );
             },
+            future: _controller.initialize(),
           ),
           SizedBox.square(
             dimension: 200,
@@ -113,8 +109,7 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
 }
 
 class _ControlsOverlay extends StatelessWidget {
-  const _ControlsOverlay({Key? key, required this.controller})
-      : super(key: key);
+  const _ControlsOverlay({Key? key, required this.controller}) : super(key: key);
 
   static const _exampleCaptionOffsets = [
     Duration(seconds: -10),
