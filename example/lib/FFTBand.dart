@@ -147,9 +147,7 @@ class _FFTBandState extends State<FFTBand> {
             alignment: Alignment.center,
             child: CustomPaint(
               foregroundPainter: SpectrumPainter(
-                // debug: true,
                 color: Color(0xff0092ff).withOpacity(.5),
-
                 paintingStyle: PaintingStyle.fill,
                 spectrumData: spectrum["bars"] as List<double>,
                 minGrowth: minGrowth,
