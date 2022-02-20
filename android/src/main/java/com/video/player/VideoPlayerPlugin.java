@@ -117,7 +117,9 @@ public class VideoPlayerPlugin implements FlutterPlugin, Messages.VideoPlayerApi
         EventChannel eventChannel =
                 new EventChannel(
                         flutterState.binaryMessenger, "video/videoEvents" + handle.id());
-
+        EventChannel spectrumChannel =
+                new EventChannel(
+                        flutterState.binaryMessenger, "video/videoSpectrumEvents" + handle.id());
         VideoPlayer player;
         if (arg.getAsset() != null) {
             String assetLookupKey;
@@ -130,6 +132,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, Messages.VideoPlayerApi
             player =
                     new VideoPlayer(
                             flutterState.applicationContext,
+                            spectrumChannel,
                             eventChannel,
                             handle,
                             "asset:///" + assetLookupKey,
@@ -142,6 +145,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, Messages.VideoPlayerApi
             player =
                     new VideoPlayer(
                             flutterState.applicationContext,
+                            spectrumChannel,
                             eventChannel,
                             handle,
                             arg.getUri(),

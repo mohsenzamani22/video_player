@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Surface;
 
-import androidx.annotation.NonNull;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -35,28 +34,22 @@ import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.view.TextureRegistry;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 final class VideoPlayer {
     private static final String FORMAT_SS = "ss";
@@ -71,8 +64,10 @@ final class VideoPlayer {
     private final TextureRegistry.SurfaceTextureEntry textureEntry;
 
     private final QueuingEventSink eventSink = new QueuingEventSink();
+    private final SpectrumEventSink spectrumEventSink = new SpectrumEventSink();
 
     private final EventChannel eventChannel;
+    private final EventChannel spectrumEventChannel;
 
     private boolean isInitialized = false;
 
@@ -80,12 +75,14 @@ final class VideoPlayer {
 
     VideoPlayer(
             Context context,
+            EventChannel spectrumEventChannel,
             EventChannel eventChannel,
             TextureRegistry.SurfaceTextureEntry textureEntry,
             String dataSource,
             String formatHint,
             Map<String, String> httpHeaders,
             VideoPlayerOptions options) {
+        this.spectrumEventChannel = spectrumEventChannel;
         this.eventChannel = eventChannel;
         this.textureEntry = textureEntry;
         this.options = options;
@@ -119,11 +116,11 @@ final class VideoPlayer {
         MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, formatHint, context);
         exoPlayer.setMediaSource(mediaSource);
         exoPlayer.prepare();
-        fftAudioProcessor.setListener((sampleRateHz, channelCount, fft) -> {
-            Log.d("Video", Arrays.toString(fft));
-            Log.d("sampleRateHz", String.valueOf(sampleRateHz));
-        });
-        setupVideoPlayer(eventChannel, textureEntry);
+
+
+
+
+        setupVideoPlayer(eventChannel, spectrumEventChannel, fftAudioProcessor,  textureEntry);
     }
 
     private static boolean isHTTP(Uri uri) {
@@ -180,9 +177,8 @@ final class VideoPlayer {
             }
         }
     }
-
     private void setupVideoPlayer(
-            EventChannel eventChannel, TextureRegistry.SurfaceTextureEntry textureEntry) {
+            EventChannel eventChannel, EventChannel spectrumEventChannel, FFTAudioProcessor fftAudioProcessor, TextureRegistry.SurfaceTextureEntry textureEntry) {
         eventChannel.setStreamHandler(
                 new EventChannel.StreamHandler() {
                     @Override
@@ -195,10 +191,22 @@ final class VideoPlayer {
                         eventSink.setDelegate(null);
                     }
                 });
+        spectrumEventChannel.setStreamHandler(
+                new EventChannel.StreamHandler() {
+                    @Override
+                    public void onListen(Object o, EventChannel.EventSink sink) {
+                        spectrumEventSink.MainThreadEventSink(sink);
+                    }
 
+                    @Override
+                    public void onCancel(Object o) {
+                        spectrumEventSink.MainThreadEventSink(null);
+                    }
+                });
         surface = new Surface(textureEntry.surfaceTexture());
         exoPlayer.setVideoSurface(surface);
         setAudioAttributes(exoPlayer, options.mixWithOthers);
+
 
         exoPlayer.addListener(
                 new Listener() {
@@ -234,6 +242,8 @@ final class VideoPlayer {
                         }
                     }
                 });
+        fftAudioProcessor.setListener(this::onFFTReady);
+
     }
 
     void sendBufferingUpdate() {
@@ -311,11 +321,20 @@ final class VideoPlayer {
         }
         textureEntry.release();
         eventChannel.setStreamHandler(null);
+        spectrumEventChannel.setStreamHandler(null);
         if (surface != null) {
             surface.release();
         }
         if (exoPlayer != null) {
             exoPlayer.release();
         }
+    }
+
+    private void onFFTReady(int sampleRateHz, int channelCount, float[] fft) {
+        Map<String, Object> event = new HashMap<>();
+        event.put("sampleRateHz", sampleRateHz);
+        event.put("channelCount", channelCount);
+        event.put("fft", fft);
+        spectrumEventSink.success(event);
     }
 }

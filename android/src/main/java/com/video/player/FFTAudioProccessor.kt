@@ -197,6 +197,7 @@ class FFTAudioProcessor : AudioProcessor {
             srcBufferPosition -= bytesToProcess
             srcBuffer.position(srcBufferPosition)
             val fft = noise?.fft(src, dst)!!
+
             listener?.onFFTReady(inputAudioFormat.sampleRate, inputAudioFormat.channelCount, fft)
         }
     }

@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
+
 import 'src/closed_caption_file.dart';
+
 export 'src/closed_caption_file.dart';
 
 final VideoPlayerPlatform _videoPlayerPlatform = VideoPlayerPlatform.instance..init();
@@ -155,11 +157,15 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   final Future<ClosedCaptionFile>? closedCaptionFile;
 
+  // StreamSubscription<VideoSpectrumEvent>? spectrum;
+
   ClosedCaptionFile? _closedCaptionFile;
   Timer? _timer;
   bool _isDisposed = false;
   Completer<void>? _creatingCompleter;
   StreamSubscription<dynamic>? _eventSubscription;
+  Stream<VideoSpectrumEvent>? spectrum;
+
   late _VideoAppLifeCycleObserver _lifeCycleObserver;
 
   @visibleForTesting
@@ -168,6 +174,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   @visibleForTesting
   int get textureId => _textureId;
+
+  // Stream<VideoSpectrumEvent> get spectrum {
+  //   return _videoPlayerPlatform.videoSpectrumEventsFor(_textureId);
+  // }
 
   Future<void> initialize() async {
     _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
@@ -265,7 +275,24 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       }
     }
 
+    void spectrumErrorListener(Object obj) {
+      print("SpectrumError : $obj");
+      // final PlatformException e = obj as PlatformException;
+      // value = VideoPlayerValue.erroneous(e.message!);
+      // _timer?.cancel();
+      // if (!initializingCompleter.isCompleted) {
+      //   initializingCompleter.completeError(obj);
+      // }
+    }
+
+    void spectrumEventListener(VideoSpectrumEvent event) {
+      // return VideoSpectrumEvent(sampleRateHz: 1, channelCount: 1, fft: [10,2]);
+      print("VideoSpectrumEvent is: ${event.toString()}");
+    }
+
     _eventSubscription = _videoPlayerPlatform.videoEventsFor(_textureId).listen(eventListener, onError: errorListener);
+    spectrum = _videoPlayerPlatform.videoSpectrumEventsFor(_textureId);
+
     return initializingCompleter.future;
   }
 
@@ -282,6 +309,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       _lifeCycleObserver.dispose();
     }
     _isDisposed = true;
+
     super.dispose();
   }
 
