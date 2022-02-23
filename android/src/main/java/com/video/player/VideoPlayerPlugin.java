@@ -171,6 +171,11 @@ public class VideoPlayerPlugin implements FlutterPlugin, Messages.VideoPlayerApi
         player.setLooping(arg.getIsLooping());
     }
 
+    public void errorListener(Messages.ErrorMessage arg) {
+        VideoPlayer player = videoPlayers.get(arg.getTextureId());
+        player.setLooping(arg.getIsError());
+    }
+
     public void setVolume(Messages.VolumeMessage arg) {
         VideoPlayer player = videoPlayers.get(arg.getTextureId());
         player.setVolume(arg.getVolume());

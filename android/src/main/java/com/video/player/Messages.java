@@ -106,6 +106,32 @@ public class Messages {
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
+  public static class ErrorMessage {
+    private Long textureId;
+    public Long getTextureId() { return textureId; }
+    public void setTextureId(Long setterArg) { this.textureId = setterArg; }
+
+    private Boolean isError;
+    public Boolean getIsError() { return isError; }
+    public void setIsError(Boolean setterArg) { this.isError = setterArg; }
+
+    Map<String, Object> toMap() {
+      Map<String, Object> toMapResult = new HashMap<>();
+      toMapResult.put("textureId", textureId);
+      toMapResult.put("isLooping", isError);
+      return toMapResult;
+    }
+    static ErrorMessage fromMap(Map<String, Object> map) {
+      ErrorMessage fromMapResult = new ErrorMessage();
+      Object textureId = map.get("textureId");
+      fromMapResult.textureId = (textureId == null) ? null : ((textureId instanceof Integer) ? (Integer)textureId : (Long)textureId);
+      Object isError = map.get("isError");
+      fromMapResult.isError = (Boolean)isError;
+      return fromMapResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
   public static class VolumeMessage {
     private Long textureId;
     public Long getTextureId() { return textureId; }
@@ -208,6 +234,7 @@ public class Messages {
     TextureMessage create(CreateMessage arg);
     void dispose(TextureMessage arg);
     void setLooping(LoopingMessage arg);
+    void errorListener(ErrorMessage arg);
     void setVolume(VolumeMessage arg);
     void setPlaybackSpeed(PlaybackSpeedMessage arg);
     void play(TextureMessage arg);
@@ -268,6 +295,27 @@ public class Messages {
               @SuppressWarnings("ConstantConditions")
               TextureMessage input = TextureMessage.fromMap((Map<String, Object>)message);
               api.dispose(input);
+              wrapped.put("result", null);
+            }
+            catch (Error | RuntimeException exception) {
+              wrapped.put("error", wrapError(exception));
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+                new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.VideoPlayerApi.errorListener", new StandardMessageCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            Map<String, Object> wrapped = new HashMap<>();
+            try {
+              @SuppressWarnings("ConstantConditions")
+              ErrorMessage input = ErrorMessage.fromMap((Map<String, Object>)message);
+              api.errorListener(input);
               wrapped.put("result", null);
             }
             catch (Error | RuntimeException exception) {

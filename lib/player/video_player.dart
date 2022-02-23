@@ -253,6 +253,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           break;
         case VideoEventType.error:
           value = value.copyWith(crash: true);
+          _errorListener();
           break;
       }
     }
@@ -317,6 +318,13 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       return;
     }
     await _videoPlayerPlatform.setLooping(_textureId, value.isLooping);
+  }
+
+  Future<void> _errorListener() async {
+    if (_isDisposedOrNotInitialized) {
+      return;
+    }
+    await _videoPlayerPlatform.errorListener(_textureId);
   }
 
   Future<void> _applyPlayPause() async {
