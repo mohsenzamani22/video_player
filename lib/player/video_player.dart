@@ -5,7 +5,6 @@ import 'package:cache_video_player/interface/video_player_platform_interface.dar
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'src/closed_caption_file.dart';
 
@@ -27,6 +26,7 @@ class VideoPlayerValue {
     this.volume = 1.0,
     this.playbackSpeed = 1.0,
     this.errorDescription,
+    this.crash = false,
   });
 
   VideoPlayerValue.uninitialized() : this(duration: Duration.zero, isInitialized: false);
@@ -46,6 +46,7 @@ class VideoPlayerValue {
   final String? errorDescription;
   final Size size;
   final bool isInitialized;
+  final bool crash;
 
   bool get hasError => errorDescription != null;
 
@@ -73,6 +74,7 @@ class VideoPlayerValue {
     double? volume,
     double? playbackSpeed,
     String? errorDescription,
+    bool? crash,
   }) {
     return VideoPlayerValue(
       duration: duration ?? this.duration,
@@ -87,6 +89,7 @@ class VideoPlayerValue {
       volume: volume ?? this.volume,
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       errorDescription: errorDescription ?? this.errorDescription,
+      crash: crash ?? this.crash,
     );
   }
 
@@ -102,6 +105,7 @@ class VideoPlayerValue {
         'isPlaying: $isPlaying, '
         'isLooping: $isLooping, '
         'isBuffering: $isBuffering, '
+        'crash: $crash, '
         'volume: $volume, '
         'playbackSpeed: $playbackSpeed, '
         'errorDescription: $errorDescription)';
@@ -157,8 +161,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   final Future<ClosedCaptionFile>? closedCaptionFile;
 
-  // StreamSubscription<VideoSpectrumEvent>? spectrum;
-
   ClosedCaptionFile? _closedCaptionFile;
   Timer? _timer;
   bool _isDisposed = false;
@@ -174,10 +176,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   @visibleForTesting
   int get textureId => _textureId;
-
-  // Stream<VideoSpectrumEvent> get spectrum {
-  //   return _videoPlayerPlatform.videoSpectrumEventsFor(_textureId);
-  // }
 
   Future<void> initialize() async {
     _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
@@ -227,7 +225,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       if (_isDisposed) {
         return;
       }
-
       switch (event.eventType) {
         case VideoEventType.initialized:
           value = value.copyWith(
@@ -241,10 +238,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           _applyPlayPause();
           break;
         case VideoEventType.completed:
-          // In this case we need to stop _timer, set isPlaying=false, and
-          // position=value.duration. Instead of setting the values directly,
-          // we use pause() and seekTo() to ensure the platform stops playing
-          // and seeks to the last frame of the video.
           pause().then((void pauseResult) => seekTo(value.duration));
           break;
         case VideoEventType.bufferingUpdate:
@@ -257,6 +250,9 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           value = value.copyWith(isBuffering: false);
           break;
         case VideoEventType.unknown:
+          break;
+        case VideoEventType.error:
+          value = value.copyWith(crash: true);
           break;
       }
     }
@@ -273,21 +269,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       if (!initializingCompleter.isCompleted) {
         initializingCompleter.completeError(obj);
       }
-    }
-
-    void spectrumErrorListener(Object obj) {
-      print("SpectrumError : $obj");
-      // final PlatformException e = obj as PlatformException;
-      // value = VideoPlayerValue.erroneous(e.message!);
-      // _timer?.cancel();
-      // if (!initializingCompleter.isCompleted) {
-      //   initializingCompleter.completeError(obj);
-      // }
-    }
-
-    void spectrumEventListener(VideoSpectrumEvent event) {
-      // return VideoSpectrumEvent(sampleRateHz: 1, channelCount: 1, fft: [10,2]);
-      print("VideoSpectrumEvent is: ${event.toString()}");
     }
 
     _eventSubscription = _videoPlayerPlatform.videoEventsFor(_textureId).listen(eventListener, onError: errorListener);

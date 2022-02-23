@@ -10,8 +10,11 @@ import android.util.Log;
 import android.view.Surface;
 
 
+import androidx.annotation.NonNull;
+
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -207,7 +210,15 @@ final class VideoPlayer {
         exoPlayer.setVideoSurface(surface);
         setAudioAttributes(exoPlayer, options.mixWithOthers);
 
+        exoPlayer.addListener(new Player.Listener() {
 
+            @Override
+            public void onPlayerError(@NonNull ExoPlaybackException error) {
+                Map<String, Object> event = new HashMap<>();
+                event.put("event", "error");
+                eventSink.success(event);
+            }
+        });
         exoPlayer.addListener(
                 new Listener() {
                     private boolean isBuffering = false;

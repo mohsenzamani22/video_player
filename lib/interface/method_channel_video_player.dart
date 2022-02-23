@@ -1,9 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +8,7 @@ import 'video_player_platform_interface.dart';
 
 /// An implementation of [VideoPlayerPlatform] that uses method channels.
 class MethodChannelVideoPlayer extends VideoPlayerPlatform {
-  VideoPlayerApi _api = VideoPlayerApi();
+  final VideoPlayerApi _api = VideoPlayerApi();
 
   @override
   Future<void> init() {
@@ -123,6 +118,8 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
           return VideoEvent(eventType: VideoEventType.bufferingStart);
         case 'bufferingEnd':
           return VideoEvent(eventType: VideoEventType.bufferingEnd);
+        case 'error':
+          return VideoEvent(eventType: VideoEventType.error);
         default:
           return VideoEvent(eventType: VideoEventType.unknown);
       }

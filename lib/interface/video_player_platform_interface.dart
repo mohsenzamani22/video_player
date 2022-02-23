@@ -1,45 +1,17 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
 import 'method_channel_video_player.dart';
 
-/// The interface that implementations of video_player must implement.
-///
-/// Platform implementations should extend this class rather than implement it as `video_player`
-/// does not consider newly added methods to be breaking changes. Extending this class
-/// (using `extends`) ensures that the subclass will get the default implementation, while
-/// platform implementations that `implements` this interface will be broken by newly added
-/// [VideoPlayerPlatform] methods.
 abstract class VideoPlayerPlatform {
-  /// Only mock implementations should set this to true.
-  ///
-  /// Mockito mocks are implementing this class with `implements` which is forbidden for anything
-  /// other than mocks (see class docs). This property provides a backdoor for mockito mocks to
-  /// skip the verification that the class isn't implemented with `implements`.
   @visibleForTesting
   bool get isMock => false;
 
   static VideoPlayerPlatform _instance = MethodChannelVideoPlayer();
-
-  /// The default instance of [VideoPlayerPlatform] to use.
-  ///
-  /// Platform-specific plugins should override this with their own
-  /// platform-specific class that extends [VideoPlayerPlatform] when they
-  /// register themselves.
-  ///
-  /// Defaults to [MethodChannelVideoPlayer].
   static VideoPlayerPlatform get instance => _instance;
 
-  // TODO(amirh): Extract common platform interface logic.
-  // https://github.com/flutter/flutter/issues/43368
   static set instance(VideoPlayerPlatform instance) {
     if (!instance.isMock) {
       try {
@@ -51,35 +23,26 @@ abstract class VideoPlayerPlatform {
     _instance = instance;
   }
 
-  /// Initializes the platform interface and disposes all existing players.
-  ///
-  /// This method is called when the plugin is first initialized
-  /// and on every full restart.
   Future<void> init() {
     throw UnimplementedError('init() has not been implemented.');
   }
 
-  /// Clears one video.
   Future<void> dispose(int textureId) {
     throw UnimplementedError('dispose() has not been implemented.');
   }
 
-  /// Creates an instance of a video player and returns its textureId.
   Future<int?> create(DataSource dataSource) {
     throw UnimplementedError('create() has not been implemented.');
   }
 
-  /// Returns a Stream of [VideoEventType]s.
   Stream<VideoEvent> videoEventsFor(int textureId) {
     throw UnimplementedError('videoEventsFor() has not been implemented.');
   }
 
-  /// Returns a Stream of [FTTDATA]s.
   Stream<VideoSpectrumEvent> videoSpectrumEventsFor(int textureId) {
     throw UnimplementedError('videoSpectrumEventsFor() has not been implemented.');
   }
 
-  /// Sets the looping attribute of the video.
   Future<void> setLooping(int textureId, bool looping) {
     throw UnimplementedError('setLooping() has not been implemented.');
   }
@@ -320,6 +283,8 @@ enum VideoEventType {
 
   /// An unknown event has been received.
   unknown,
+
+  error,
 }
 
 /// Describes a discrete segment of time within a video using a [start] and

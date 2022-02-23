@@ -1,2 +1,2 @@
-v0.0.1
-Initial version.
+v0.0.3+1
+Handle Playback Error In Android Version 
