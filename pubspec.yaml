@@ -3,7 +3,7 @@ description: Flutter plugin for displaying inline video with other Flutter
   widgets on Android With Cache capability.
 repository: https://github.com/mohsenzamani22/video_player.git
 
-version: 0.0.3+4
+version: 0.0.3+5
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
