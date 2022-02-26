@@ -27,12 +27,14 @@ class VideoPlayerValue {
     this.volume = 1.0,
     this.playbackSpeed = 1.0,
     this.errorDescription,
+    this.errorDetails,
   });
 
   VideoPlayerValue.uninitialized() : this(duration: Duration.zero, isInitialized: false);
 
-  VideoPlayerValue.erroneous(String errorDescription)
-      : this(duration: Duration.zero, isInitialized: false, errorDescription: errorDescription);
+  VideoPlayerValue.erroneous(String errorDescription, String errorDetails)
+      : this(
+    duration: Duration.zero, isInitialized: false, errorDescription: errorDescription, errorDetails: errorDetails,);
 
   final Duration duration;
   final Duration position;
@@ -44,6 +46,7 @@ class VideoPlayerValue {
   final double volume;
   final double playbackSpeed;
   final String? errorDescription;
+  final String? errorDetails;
   final Size size;
   final bool isInitialized;
 
@@ -115,13 +118,13 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         httpHeaders = const {},
         super(VideoPlayerValue(duration: Duration.zero));
 
-  VideoPlayerController.network(
-    this.dataSource, {
+  VideoPlayerController.network(this.dataSource, {
     this.formatHint,
     this.closedCaptionFile,
     this.videoPlayerOptions,
     this.httpHeaders = const {},
-  })  : dataSourceType = DataSourceType.network,
+  })
+      : dataSourceType = DataSourceType.network,
         package = null,
         super(VideoPlayerValue(duration: Duration.zero));
 
@@ -135,7 +138,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   VideoPlayerController.contentUri(Uri contentUri, {this.closedCaptionFile, this.videoPlayerOptions})
       : assert(defaultTargetPlatform == TargetPlatform.android,
-            'VideoPlayerController.contentUri is only supported on Android.'),
+  'VideoPlayerController.contentUri is only supported on Android.'),
         dataSource = contentUri.toString(),
         dataSourceType = DataSourceType.contentUri,
         package = null,
@@ -241,10 +244,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           _applyPlayPause();
           break;
         case VideoEventType.completed:
-          // In this case we need to stop _timer, set isPlaying=false, and
-          // position=value.duration. Instead of setting the values directly,
-          // we use pause() and seekTo() to ensure the platform stops playing
-          // and seeks to the last frame of the video.
+        // In this case we need to stop _timer, set isPlaying=false, and
+        // position=value.duration. Instead of setting the values directly,
+        // we use pause() and seekTo() to ensure the platform stops playing
+        // and seeks to the last frame of the video.
           pause().then((void pauseResult) => seekTo(value.duration));
           break;
         case VideoEventType.bufferingUpdate:
@@ -268,7 +271,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
     void errorListener(Object obj) {
       final PlatformException e = obj as PlatformException;
-      value = VideoPlayerValue.erroneous(e.message!);
+      value = VideoPlayerValue.erroneous(e.message!, e.details!);
       _timer?.cancel();
       if (!initializingCompleter.isCompleted) {
         initializingCompleter.completeError(obj);
@@ -347,7 +350,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       _timer?.cancel();
       _timer = Timer.periodic(
         const Duration(milliseconds: 500),
-        (Timer timer) async {
+            (Timer timer) async {
           if (_isDisposed) {
             return;
           }
@@ -624,8 +627,7 @@ class _VideoScrubberState extends State<_VideoScrubber> {
 }
 
 class VideoProgressIndicator extends StatefulWidget {
-  VideoProgressIndicator(
-    this.controller, {
+  VideoProgressIndicator(this.controller, {
     this.colors = const VideoProgressColors(),
     required this.allowScrubbing,
     this.padding = const EdgeInsets.only(top: 5.0),
@@ -738,10 +740,13 @@ class ClosedCaption extends StatelessWidget {
     }
 
     final TextStyle effectiveTextStyle = textStyle ??
-        DefaultTextStyle.of(context).style.copyWith(
-              fontSize: 36.0,
-              color: Colors.white,
-            );
+        DefaultTextStyle
+            .of(context)
+            .style
+            .copyWith(
+          fontSize: 36.0,
+          color: Colors.white,
+        );
 
     return Align(
       alignment: Alignment.bottomCenter,

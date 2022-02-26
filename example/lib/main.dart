@@ -32,13 +32,13 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
     super.initState();
 
     _controller = VideoPlayerController.network(
-      'https://046401bd-post-video.s3.ir-thr-at1.arvanstorage.com/df429f69-9a69-4e18-b23c-7d424c0d2edf729c8.mp4',
+      // 'https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-ogv-file.ogv',
+      'https://hajifirouz5.cdn.asset.aparat.cloud/aparat-video/337dbaa5ea7c9d4e77d9aac5aff9b1c042882824-144p.mp4?wmsAuthSign=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6IjlmYTE3M2VmYzkzMjlhMmQyZWFiOGMyZDI4NGNmMGMzIiwiZXhwIjoxNjQ1OTMwNTcwLCJpc3MiOiJTYWJhIElkZWEgR1NJRyJ9.ROCdwBHSOXCsf38brCX3jyb1vQSQKrZQ-3iE93WSV0A',
       // 'https://as10.cdn.asset.aparat.com/aparat-video/f1154d8132af75f5a4b6eb35f6b430a622216822-240p.mp4?wmsAuthSign=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6Ijg2MDJjNjJkMmFiYmNiMzc5ODFmYzA2ZjBlOGMwMDhkIiwiZXhwIjoxNjQ0NTYzODQ2LCJpc3MiOiJTYWJhIElkZWEgR1NJRyJ9.06lxphXJCQ7k9nVQWZZstTunwQWd05rVdaT-7H8nvGA',
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
     );
-
-    _controller.setLooping(true);
     _controller.initialize().then((value) => setState(() {}));
+    _controller.setLooping(true);
   }
 
   @override

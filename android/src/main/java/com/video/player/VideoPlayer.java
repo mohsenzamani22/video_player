@@ -12,6 +12,7 @@ import android.view.Surface;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -239,6 +240,14 @@ final class VideoPlayer {
 
                         if (playbackState != Player.STATE_BUFFERING) {
                             setBuffering(false);
+                        }
+                    }
+
+                    @Override
+                    public void onPlayerError(final ExoPlaybackException error) {
+                        setBuffering(false);
+                        if (eventSink != null) {
+                            eventSink.error("VideoError", "Video player had error " + error, error.getCause());
                         }
                     }
                 });
