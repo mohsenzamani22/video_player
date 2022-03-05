@@ -252,6 +252,14 @@ final class VideoPlayer {
                             setBuffering(false);
                         }
                     }
+
+                    @Override
+                    public void onPlayerError(final ExoPlaybackException error) {
+                        setBuffering(false);
+                        if (eventSink != null) {
+                            eventSink.error("VideoError", "Video player had error " + error, error.getCause());
+                        }
+                    }
                 });
         fftAudioProcessor.setListener(this::onFFTReady);
 
