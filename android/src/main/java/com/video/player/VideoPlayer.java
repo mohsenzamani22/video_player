@@ -21,6 +21,7 @@ import com.google.android.exoplayer2.Player.Listener;
 import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioAttributes;
+import com.google.android.exoplayer2.audio.SonicAudioProcessor;
 import com.google.android.exoplayer2.audio.AudioCapabilities;
 import com.google.android.exoplayer2.audio.AudioProcessor;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
@@ -87,6 +88,8 @@ final class VideoPlayer {
         this.eventChannel = eventChannel;
         this.textureEntry = textureEntry;
         this.options = options;
+
+
         Uri uri = Uri.parse(dataSource);
         FFTAudioProcessor fftAudioProcessor = new FFTAudioProcessor();
         DefaultRenderersFactory defaultRenderersFactory = new DefaultRenderersFactory(context) {
@@ -119,9 +122,7 @@ final class VideoPlayer {
         exoPlayer.prepare();
 
 
-
-
-        setupVideoPlayer(eventChannel, spectrumEventChannel, fftAudioProcessor,  textureEntry);
+        setupVideoPlayer(eventChannel, spectrumEventChannel, fftAudioProcessor, textureEntry);
     }
 
     private static boolean isHTTP(Uri uri) {
@@ -178,6 +179,7 @@ final class VideoPlayer {
             }
         }
     }
+
     private void setupVideoPlayer(
             EventChannel eventChannel, EventChannel spectrumEventChannel, FFTAudioProcessor fftAudioProcessor, TextureRegistry.SurfaceTextureEntry textureEntry) {
         eventChannel.setStreamHandler(
