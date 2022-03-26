@@ -28,13 +28,13 @@ class VideoPlayerValue {
     this.playbackSpeed = 1.0,
     this.errorDescription,
     this.errorDetails,
+    this.crash = false,
   });
 
   VideoPlayerValue.uninitialized() : this(duration: Duration.zero, isInitialized: false);
 
-  VideoPlayerValue.erroneous(String errorDescription, String errorDetails)
-      : this(
-    duration: Duration.zero, isInitialized: false, errorDescription: errorDescription, errorDetails: errorDetails,);
+  VideoPlayerValue.erroneous(String errorDescription)
+      : this(duration: Duration.zero, isInitialized: false, errorDescription: errorDescription);
 
   final Duration duration;
   final Duration position;
@@ -46,7 +46,6 @@ class VideoPlayerValue {
   final double volume;
   final double playbackSpeed;
   final String? errorDescription;
-  final String? errorDetails;
   final Size size;
   final bool isInitialized;
 
@@ -118,13 +117,13 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         httpHeaders = const {},
         super(VideoPlayerValue(duration: Duration.zero));
 
-  VideoPlayerController.network(this.dataSource, {
+  VideoPlayerController.network(
+    this.dataSource, {
     this.formatHint,
     this.closedCaptionFile,
     this.videoPlayerOptions,
     this.httpHeaders = const {},
-  })
-      : dataSourceType = DataSourceType.network,
+  })  : dataSourceType = DataSourceType.network,
         package = null,
         super(VideoPlayerValue(duration: Duration.zero));
 
@@ -138,7 +137,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   VideoPlayerController.contentUri(Uri contentUri, {this.closedCaptionFile, this.videoPlayerOptions})
       : assert(defaultTargetPlatform == TargetPlatform.android,
-  'VideoPlayerController.contentUri is only supported on Android.'),
+            'VideoPlayerController.contentUri is only supported on Android.'),
         dataSource = contentUri.toString(),
         dataSourceType = DataSourceType.contentUri,
         package = null,
@@ -271,7 +270,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
     void errorListener(Object obj) {
       final PlatformException e = obj as PlatformException;
-      value = VideoPlayerValue.erroneous(e.message!, e.details!);
+      value = VideoPlayerValue.erroneous(e.message!);
       _timer?.cancel();
       if (!initializingCompleter.isCompleted) {
         initializingCompleter.completeError(obj);
@@ -350,7 +349,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       _timer?.cancel();
       _timer = Timer.periodic(
         const Duration(milliseconds: 500),
-            (Timer timer) async {
+        (Timer timer) async {
           if (_isDisposed) {
             return;
           }
@@ -627,7 +626,8 @@ class _VideoScrubberState extends State<_VideoScrubber> {
 }
 
 class VideoProgressIndicator extends StatefulWidget {
-  VideoProgressIndicator(this.controller, {
+  VideoProgressIndicator(
+    this.controller, {
     this.colors = const VideoProgressColors(),
     required this.allowScrubbing,
     this.padding = const EdgeInsets.only(top: 5.0),
@@ -740,13 +740,10 @@ class ClosedCaption extends StatelessWidget {
     }
 
     final TextStyle effectiveTextStyle = textStyle ??
-        DefaultTextStyle
-            .of(context)
-            .style
-            .copyWith(
-          fontSize: 36.0,
-          color: Colors.white,
-        );
+        DefaultTextStyle.of(context).style.copyWith(
+              fontSize: 36.0,
+              color: Colors.white,
+            );
 
     return Align(
       alignment: Alignment.bottomCenter,
