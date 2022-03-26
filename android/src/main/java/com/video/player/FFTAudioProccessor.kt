@@ -6,6 +6,7 @@ import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.Format
 import com.google.android.exoplayer2.audio.AudioProcessor
 import com.google.android.exoplayer2.util.Assertions
+import com.google.android.exoplayer2.util.Log
 import com.google.android.exoplayer2.util.Util
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -75,7 +76,8 @@ class FFTAudioProcessor : AudioProcessor {
      * we will delay ourselves to match the audio output.
      */
     private fun getDefaultBufferSizeInBytes(audioFormat: AudioProcessor.AudioFormat): Int {
-        val outputPcmFrameSize = Util.getPcmFrameSize(audioFormat.encoding, audioFormat.channelCount)
+        val outputPcmFrameSize =
+            Util.getPcmFrameSize(audioFormat.encoding, audioFormat.channelCount)
         val minBufferSize =
             AudioTrack.getMinBufferSize(
                 audioFormat.sampleRate,
@@ -106,7 +108,7 @@ class FFTAudioProcessor : AudioProcessor {
         return isActive
     }
 
-    private lateinit var inputAudioFormat :AudioProcessor.AudioFormat
+    private lateinit var inputAudioFormat: AudioProcessor.AudioFormat
 
     override fun configure(inputAudioFormat: AudioProcessor.AudioFormat): AudioProcessor.AudioFormat {
         if (inputAudioFormat.encoding != C.ENCODING_PCM_16BIT) {
@@ -203,6 +205,7 @@ class FFTAudioProcessor : AudioProcessor {
     }
 
     override fun queueEndOfStream() {
+        processBuffer = AudioProcessor.EMPTY_BUFFER;
         inputEnded = true
     }
 
@@ -225,6 +228,7 @@ class FFTAudioProcessor : AudioProcessor {
     override fun reset() {
         flush()
         processBuffer = AudioProcessor.EMPTY_BUFFER
-        inputAudioFormat = AudioProcessor.AudioFormat(Format.NO_VALUE,Format.NO_VALUE,Format.NO_VALUE)
+        inputAudioFormat =
+            AudioProcessor.AudioFormat(Format.NO_VALUE, Format.NO_VALUE, Format.NO_VALUE)
     }
 }

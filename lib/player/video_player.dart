@@ -5,6 +5,7 @@ import 'package:cache_video_player/interface/video_player_platform_interface.dar
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'src/closed_caption_file.dart';
 
@@ -26,13 +27,14 @@ class VideoPlayerValue {
     this.volume = 1.0,
     this.playbackSpeed = 1.0,
     this.errorDescription,
-    this.crash = false,
+    this.errorDetails,
   });
 
   VideoPlayerValue.uninitialized() : this(duration: Duration.zero, isInitialized: false);
 
-  VideoPlayerValue.erroneous(String errorDescription)
-      : this(duration: Duration.zero, isInitialized: false, errorDescription: errorDescription);
+  VideoPlayerValue.erroneous(String errorDescription, String errorDetails)
+      : this(
+    duration: Duration.zero, isInitialized: false, errorDescription: errorDescription, errorDetails: errorDetails,);
 
   final Duration duration;
   final Duration position;
@@ -44,9 +46,9 @@ class VideoPlayerValue {
   final double volume;
   final double playbackSpeed;
   final String? errorDescription;
+  final String? errorDetails;
   final Size size;
   final bool isInitialized;
-  final bool crash;
 
   bool get hasError => errorDescription != null;
 
@@ -74,7 +76,6 @@ class VideoPlayerValue {
     double? volume,
     double? playbackSpeed,
     String? errorDescription,
-    bool? crash,
   }) {
     return VideoPlayerValue(
       duration: duration ?? this.duration,
@@ -89,7 +90,6 @@ class VideoPlayerValue {
       volume: volume ?? this.volume,
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       errorDescription: errorDescription ?? this.errorDescription,
-      crash: crash ?? this.crash,
     );
   }
 
@@ -105,7 +105,6 @@ class VideoPlayerValue {
         'isPlaying: $isPlaying, '
         'isLooping: $isLooping, '
         'isBuffering: $isBuffering, '
-        'crash: $crash, '
         'volume: $volume, '
         'playbackSpeed: $playbackSpeed, '
         'errorDescription: $errorDescription)';
@@ -119,13 +118,13 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         httpHeaders = const {},
         super(VideoPlayerValue(duration: Duration.zero));
 
-  VideoPlayerController.network(
-    this.dataSource, {
+  VideoPlayerController.network(this.dataSource, {
     this.formatHint,
     this.closedCaptionFile,
     this.videoPlayerOptions,
     this.httpHeaders = const {},
-  })  : dataSourceType = DataSourceType.network,
+  })
+      : dataSourceType = DataSourceType.network,
         package = null,
         super(VideoPlayerValue(duration: Duration.zero));
 
@@ -139,7 +138,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   VideoPlayerController.contentUri(Uri contentUri, {this.closedCaptionFile, this.videoPlayerOptions})
       : assert(defaultTargetPlatform == TargetPlatform.android,
-            'VideoPlayerController.contentUri is only supported on Android.'),
+  'VideoPlayerController.contentUri is only supported on Android.'),
         dataSource = contentUri.toString(),
         dataSourceType = DataSourceType.contentUri,
         package = null,
@@ -161,6 +160,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   final Future<ClosedCaptionFile>? closedCaptionFile;
 
+  // StreamSubscription<VideoSpectrumEvent>? spectrum;
+
   ClosedCaptionFile? _closedCaptionFile;
   Timer? _timer;
   bool _isDisposed = false;
@@ -176,6 +177,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   @visibleForTesting
   int get textureId => _textureId;
+
+  // Stream<VideoSpectrumEvent> get spectrum {
+  //   return _videoPlayerPlatform.videoSpectrumEventsFor(_textureId);
+  // }
 
   Future<void> initialize() async {
     _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
@@ -225,6 +230,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       if (_isDisposed) {
         return;
       }
+
       switch (event.eventType) {
         case VideoEventType.initialized:
           value = value.copyWith(
@@ -238,6 +244,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           _applyPlayPause();
           break;
         case VideoEventType.completed:
+        // In this case we need to stop _timer, set isPlaying=false, and
+        // position=value.duration. Instead of setting the values directly,
+        // we use pause() and seekTo() to ensure the platform stops playing
+        // and seeks to the last frame of the video.
           pause().then((void pauseResult) => seekTo(value.duration));
           break;
         case VideoEventType.bufferingUpdate:
@@ -251,10 +261,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           break;
         case VideoEventType.unknown:
           break;
-        case VideoEventType.error:
-          value = value.copyWith(crash: true);
-          _errorListener();
-          break;
       }
     }
 
@@ -265,11 +271,26 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
     void errorListener(Object obj) {
       final PlatformException e = obj as PlatformException;
-      value = VideoPlayerValue.erroneous(e.message!);
+      value = VideoPlayerValue.erroneous(e.message!, e.details!);
       _timer?.cancel();
       if (!initializingCompleter.isCompleted) {
         initializingCompleter.completeError(obj);
       }
+    }
+
+    void spectrumErrorListener(Object obj) {
+      print("SpectrumError : $obj");
+      // final PlatformException e = obj as PlatformException;
+      // value = VideoPlayerValue.erroneous(e.message!);
+      // _timer?.cancel();
+      // if (!initializingCompleter.isCompleted) {
+      //   initializingCompleter.completeError(obj);
+      // }
+    }
+
+    void spectrumEventListener(VideoSpectrumEvent event) {
+      // return VideoSpectrumEvent(sampleRateHz: 1, channelCount: 1, fft: [10,2]);
+      print("VideoSpectrumEvent is: ${event.toString()}");
     }
 
     _eventSubscription = _videoPlayerPlatform.videoEventsFor(_textureId).listen(eventListener, onError: errorListener);
@@ -320,13 +341,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     await _videoPlayerPlatform.setLooping(_textureId, value.isLooping);
   }
 
-  Future<void> _errorListener() async {
-    if (_isDisposedOrNotInitialized) {
-      return;
-    }
-    await _videoPlayerPlatform.errorListener(_textureId);
-  }
-
   Future<void> _applyPlayPause() async {
     if (_isDisposedOrNotInitialized) {
       return;
@@ -336,7 +350,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       _timer?.cancel();
       _timer = Timer.periodic(
         const Duration(milliseconds: 500),
-        (Timer timer) async {
+            (Timer timer) async {
           if (_isDisposed) {
             return;
           }
@@ -613,8 +627,7 @@ class _VideoScrubberState extends State<_VideoScrubber> {
 }
 
 class VideoProgressIndicator extends StatefulWidget {
-  VideoProgressIndicator(
-    this.controller, {
+  VideoProgressIndicator(this.controller, {
     this.colors = const VideoProgressColors(),
     required this.allowScrubbing,
     this.padding = const EdgeInsets.only(top: 5.0),
@@ -727,10 +740,13 @@ class ClosedCaption extends StatelessWidget {
     }
 
     final TextStyle effectiveTextStyle = textStyle ??
-        DefaultTextStyle.of(context).style.copyWith(
-              fontSize: 36.0,
-              color: Colors.white,
-            );
+        DefaultTextStyle
+            .of(context)
+            .style
+            .copyWith(
+          fontSize: 36.0,
+          color: Colors.white,
+        );
 
     return Align(
       alignment: Alignment.bottomCenter,
