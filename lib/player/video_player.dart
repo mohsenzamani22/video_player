@@ -27,8 +27,6 @@ class VideoPlayerValue {
     this.volume = 1.0,
     this.playbackSpeed = 1.0,
     this.errorDescription,
-    this.errorDetails,
-    this.crash = false,
   });
 
   VideoPlayerValue.uninitialized() : this(duration: Duration.zero, isInitialized: false);
@@ -243,10 +241,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           _applyPlayPause();
           break;
         case VideoEventType.completed:
-        // In this case we need to stop _timer, set isPlaying=false, and
-        // position=value.duration. Instead of setting the values directly,
-        // we use pause() and seekTo() to ensure the platform stops playing
-        // and seeks to the last frame of the video.
+          // In this case we need to stop _timer, set isPlaying=false, and
+          // position=value.duration. Instead of setting the values directly,
+          // we use pause() and seekTo() to ensure the platform stops playing
+          // and seeks to the last frame of the video.
           pause().then((void pauseResult) => seekTo(value.duration));
           break;
         case VideoEventType.bufferingUpdate:
