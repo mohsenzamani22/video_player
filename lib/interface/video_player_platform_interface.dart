@@ -43,7 +43,7 @@ abstract class VideoPlayerPlatform {
     throw UnimplementedError('videoSpectrumEventsFor() has not been implemented.');
   }
 
-  Future<void> errorListener(int textureId) {
+  Future<bool> errorListener(int textureId) {
     throw UnimplementedError('setLooping() has not been implemented.');
   }
 
